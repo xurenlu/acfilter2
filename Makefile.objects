@@ -1,0 +1,18 @@
+acfilter.lo: /Users/renlu/Dev/php-5.4.18/ext/acfilter/acfilter.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/renlu/Dev/php-5.4.18/ext/acfilter $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/renlu/Dev/php-5.4.18/ext/acfilter/acfilter.c -o acfilter.lo 
+acseg_rbtree.lo: /Users/renlu/Dev/php-5.4.18/ext/acfilter/acseg_rbtree.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/renlu/Dev/php-5.4.18/ext/acfilter $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/renlu/Dev/php-5.4.18/ext/acfilter/acseg_rbtree.c -o acseg_rbtree.lo 
+acseg_tree.lo: /Users/renlu/Dev/php-5.4.18/ext/acfilter/acseg_tree.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/renlu/Dev/php-5.4.18/ext/acfilter $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/renlu/Dev/php-5.4.18/ext/acfilter/acseg_tree.c -o acseg_tree.lo 
+acseg_util.lo: /Users/renlu/Dev/php-5.4.18/ext/acfilter/acseg_util.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/renlu/Dev/php-5.4.18/ext/acfilter $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/renlu/Dev/php-5.4.18/ext/acfilter/acseg_util.c -o acseg_util.lo 
+exists.lo: /Users/renlu/Dev/php-5.4.18/ext/acfilter/exists.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/renlu/Dev/php-5.4.18/ext/acfilter $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/renlu/Dev/php-5.4.18/ext/acfilter/exists.c -o exists.lo 
+mem_collector.lo: /Users/renlu/Dev/php-5.4.18/ext/acfilter/mem_collector.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/Users/renlu/Dev/php-5.4.18/ext/acfilter $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/renlu/Dev/php-5.4.18/ext/acfilter/mem_collector.c -o mem_collector.lo 
+$(phplibdir)/acfilter.la: ./acfilter.la
+	$(LIBTOOL) --mode=install cp ./acfilter.la $(phplibdir)
+
+./acfilter.la: $(shared_objects_acfilter) $(ACFILTER_SHARED_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_acfilter) $(ACFILTER_SHARED_LIBADD)
+

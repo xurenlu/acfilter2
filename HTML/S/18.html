@@ -1,0 +1,102 @@
+<html>
+<head>
+<title>mem_collector.c</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/mem_collector.c</h2>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L12'>[^]</a><a href='#L65'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L12' title='Defined at 12.'>mc_malloc</a>
+<li><a href='#L36' title='Defined at 36.'>mc_calloc</a>
+<li><a href='#L49' title='Defined at 49.'>mc_free</a>
+<li><a href='#L65' title='Defined at 65.'>mc_destory</a>
+</ol>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/* </font></i>
+<a name='L2'><i><font color='green'> * Make memory management easy </font></i>
+<a name='L3'><i><font color='green'> */</font></i>
+<a name='L4'>
+<a name='L5'><font color='darkred'>#include</font> &lt;stdio.h&gt;
+<a name='L6'><font color='darkred'>#include</font> &lt;stdlib.h&gt;
+<a name='L7'><font color='darkred'>#include</font> &lt;string.h&gt;
+<a name='L8'><font color='darkred'>#include</font> "<a href='4.html'>mem_collector.h</a>"
+<a name='L9'>
+<a name='L10'>
+<a name='L11'><b>void</b> *
+<a name='L12'><a href='../R/90.html' title='Multiple refered from 2 places.'>mc_malloc</a>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc, size_t size)
+<a name='L13'><font color='red'>{</font>
+<a name='L14'>        <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *mem_block;
+<a name='L15'>
+<a name='L16'>        mem_block = malloc(<b>sizeof</b>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a>) + size);
+<a name='L17'>        <b>if</b> (mem_block == NULL)<font color='red'>{</font>
+<a name='L18'>                <b>return</b> NULL;
+<a name='L19'>        <font color='red'>}</font>
+<a name='L20'>
+<a name='L21'>        <b>if</b> (*mc == NULL)<font color='red'>{</font>
+<a name='L22'>                mem_block-&gt;self = mc;
+<a name='L23'>                mem_block-&gt;next = NULL;
+<a name='L24'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L25'>                mem_block-&gt;next = *mc;
+<a name='L26'>                mem_block-&gt;self = mc;
+<a name='L27'>
+<a name='L28'>                mem_block-&gt;next-&gt;self = &amp;(mem_block-&gt;next);
+<a name='L29'>        <font color='red'>}</font>
+<a name='L30'>
+<a name='L31'>        *mc = mem_block;
+<a name='L32'>        <b>return</b> (u_char *) mem_block + <b>sizeof</b>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a>);
+<a name='L33'><font color='red'>}</font>
+<a name='L34'>
+<a name='L35'><b>void</b> *
+<a name='L36'><a href='../R/85.html' title='Multiple refered from 13 places.'>mc_calloc</a>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc, size_t size)
+<a name='L37'><font color='red'>{</font>
+<a name='L38'>        <b>void</b> *p;
+<a name='L39'>
+<a name='L40'>        p = <a href='../S/18.html#L12' title='Defined at 12 in mem_collector.c.'>mc_malloc</a>(mc, size);
+<a name='L41'>        <b>if</b> (p)<font color='red'>{</font>
+<a name='L42'>                memset(p, 0, size);     
+<a name='L43'>        <font color='red'>}</font>
+<a name='L44'>
+<a name='L45'>        <b>return</b> p;
+<a name='L46'><font color='red'>}</font>
+<a name='L47'>
+<a name='L48'><b>void</b> 
+<a name='L49'><a href='../R/89.html' title='Multiple refered from 2 places.'>mc_free</a>(<b>void</b> *data)
+<a name='L50'><font color='red'>{</font>
+<a name='L51'>        <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *mem_block;
+<a name='L52'>
+<a name='L53'>        mem_block = (<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *) ((u_char *) data - <b>sizeof</b>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a>));
+<a name='L54'>
+<a name='L55'>        <b>if</b> (mem_block-&gt;next) <font color='red'>{</font>
+<a name='L56'>                *mem_block-&gt;self = mem_block-&gt;next;
+<a name='L57'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L58'>                *mem_block-&gt;self = NULL;        
+<a name='L59'>        <font color='red'>}</font>
+<a name='L60'>        
+<a name='L61'>        free(mem_block);
+<a name='L62'><font color='red'>}</font>
+<a name='L63'>
+<a name='L64'><b>void</b> 
+<a name='L65'><a href='../R/88.html' title='Multiple refered from 4 places.'>mc_destory</a>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *mc)
+<a name='L66'><font color='red'>{</font>
+<a name='L67'>        <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *next, *current;
+<a name='L68'>
+<a name='L69'>        current = mc;
+<a name='L70'>        <b>while</b> (current) <font color='red'>{</font>
+<a name='L71'>                next = current-&gt;next;
+<a name='L72'>                free(current);
+<a name='L73'>                current = next;
+<a name='L74'>        <font color='red'>}</font>
+<a name='L75'>
+<a name='L76'><font color='red'>}</font>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L12'>[^]</a><a href='#L65'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

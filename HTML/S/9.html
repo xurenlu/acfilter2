@@ -1,0 +1,105 @@
+<html>
+<head>
+<title>exists.c</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/exists.c</h2>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L18'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L18' title='Defined at 18.'>main</a>
+</ol>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/*</font></i>
+<a name='L2'><i><font color='green'> *</font></i>
+<a name='L3'><i><font color='green'> */</font></i>
+<a name='L4'>
+<a name='L5'><font color='darkred'>#include</font> &lt;sys/types.h&gt;
+<a name='L6'><font color='darkred'>#include</font> &lt;sys/stat.h&gt;
+<a name='L7'><font color='darkred'>#include</font> &lt;fcntl.h&gt;
+<a name='L8'>
+<a name='L9'><font color='darkred'>#include</font> &lt;stdlib.h&gt;
+<a name='L10'><font color='darkred'>#include</font> &lt;unistd.h&gt;
+<a name='L11'><font color='darkred'>#include</font> &lt;stdio.h&gt;
+<a name='L12'><font color='darkred'>#include</font> &lt;time.h&gt;
+<a name='L13'>
+<a name='L14'><font color='darkred'>#include</font> "<a href='4.html'>mem_collector.h</a>"
+<a name='L15'><font color='darkred'>#include</font> "<a href='15.html'>acseg_tree.h</a>"
+<a name='L16'>
+<a name='L17'>
+<a name='L18'><b>int</b> main(<b>int</b> argc, <b>char</b> **argv)
+<a name='L19'><font color='red'>{</font>
+<a name='L20'>    <b>char</b> * dict_path;<i><font color='green'>//  = "/home/renlu/dict.txt";</font></i>
+<a name='L21'>    <b>if</b>(argc&lt;2)<font color='red'>{</font>
+<a name='L22'>        printf("usage:%s dict.file",argv[0]);exit(2);
+<a name='L23'>    <font color='red'>}</font>
+<a name='L24'>    dict_path = malloc(<b>sizeof</b>(<b>char</b>)*1024);
+<a name='L25'>    <b>if</b>(!dict_path) <font color='red'>{</font>exit(1);<font color='red'>}</font>
+<a name='L26'>    strcpy(dict_path,argv[1]);
+<a name='L27'>        <i><font color='green'>//char dict_path[]  = "dict3.txt";</font></i>
+<a name='L28'>        <b>char</b> text_path[]  = "mogu.txt";
+<a name='L29'>        <i><font color='green'>//char text_path[]  = "info.txt";</font></i>
+<a name='L30'>
+<a name='L31'>        <b>char</b> new_word[] =  "new_word";
+<a name='L32'>
+<a name='L33'>        <b>int</b> hash_size = 50;
+<a name='L34'>        <b>unsigned</b> <b>char</b> buf[8192];
+<a name='L35'>
+<a name='L36'>        <b>int</b> text_fd;
+<a name='L37'>        ssize_t read_size;
+<a name='L38'>        <b>int</b> j;
+<a name='L39'>
+<a name='L40'>        <a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> *acseg_index;
+<a name='L41'>        acseg_index = <a href='../S/21.html#L38' title='Defined at 38 in acseg_tree.c.'>acseg_index_init</a>();
+<a name='L42'>
+<a name='L43'>        <i><font color='green'>//print_time("load dict start");</font></i>
+<a name='L44'>        <b>if</b> ( !<a href='../S/21.html#L154' title='Defined at 154 in acseg_tree.c.'>acseg_index_load</a>(acseg_index, dict_path) ) <font color='red'>{</font>
+<a name='L45'>                printf("load dict failed\n");
+<a name='L46'>                <b>return</b> 0;
+<a name='L47'>        <font color='red'>}</font>
+<a name='L48'>        <i><font color='green'>//print_time("load dict end");</font></i>
+<a name='L49'>        <a href='../S/21.html#L240' title='Defined at 240 in acseg_tree.c.'>acseg_index_fix</a>(acseg_index);
+<a name='L50'>        <i><font color='green'>//print_time("fix index end \n");</font></i>
+<a name='L51'>        
+<a name='L52'>        <a href='../S/15.html#L45' title='Defined at 45 in acseg_tree.h.'>acseg_result_t</a> * seg_result;
+<a name='L53'>
+<a name='L54'>        <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> text;
+<a name='L55'>
+<a name='L56'>        text_fd = open(text_path, O_RDONLY);
+<a name='L57'>        read_size = read(text_fd, buf, <b>sizeof</b>(buf));
+<a name='L58'>        <i><font color='green'>//printf("%s", buf);</font></i>
+<a name='L59'>
+<a name='L60'>        text.len  = read_size;
+<a name='L61'>        text.data = buf;
+<a name='L62'>
+<a name='L63'>        <i><font color='green'>//print_time("start seg\n");</font></i>
+<a name='L64'>        seg_result = <a href='../S/21.html#L352' title='Defined at 352 in acseg_tree.c.'>acseg_full_seg</a>(acseg_index, &amp;text);
+<a name='L65'>        <i><font color='green'>//print_time("end seg\n");</font></i>
+<a name='L66'>
+<a name='L67'>        <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *phrase;
+<a name='L68'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *result_item;
+<a name='L69'>        result_item = seg_result-&gt;list-&gt;first;
+<a name='L70'>        <b>while</b> (result_item) <font color='red'>{</font>
+<a name='L71'>                phrase = (<a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *) result_item-&gt;data;     
+<a name='L72'>                printf("%s ", phrase-&gt;data); 
+<a name='L73'>                result_item = result_item-&gt;next;
+<a name='L74'>        <font color='red'>}</font>
+<a name='L75'>
+<a name='L76'>        <i><font color='green'>// free res</font></i>
+<a name='L77'>        close(text_fd);
+<a name='L78'>        <a href='../S/21.html#L400' title='Defined at 400 in acseg_tree.c.'>acseg_destory_result</a>(&amp;seg_result);
+<a name='L79'>        <a href='../S/21.html#L306' title='Defined at 306 in acseg_tree.c.'>acseg_destory_index</a>(&amp;acseg_index);
+<a name='L80'>
+<a name='L81'>
+<a name='L82'><font color='red'>}</font>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;][^]<a href='#L18'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

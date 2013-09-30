@@ -1,0 +1,80 @@
+<html>
+<head>
+<title>acseg_tree.h</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/acseg_tree.h</h2>
+<i><font color='green'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2><a href='../J/6.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/*</font></i>
+<a name='L2'><i><font color='green'> * ac seg tree</font></i>
+<a name='L3'><i><font color='green'> */</font></i>
+<a name='L4'><font color='darkred'>#ifndef</font> <a href='../S/15.html#L5' title='Defined at 5 in acseg_tree.h.'>_AC_SEG_TREE_H_INCLUDED_</a>
+<a name='L5'><font color='darkred'>#define</font> <a href='../S/15.html#L4' title='Refered from 4 in acseg_tree.h.'>_AC_SEG_TREE_H_INCLUDED_</a>
+<a name='L6'>
+<a name='L7'><font color='darkred'>#include</font> "<a href='4.html'>mem_collector.h</a>"
+<a name='L8'><font color='darkred'>#include</font> "<a href='47.html'>acseg_rbtree.h</a>"
+<a name='L9'><font color='darkred'>#include</font> "<a href='6.html'>acseg_util.h</a>"
+<a name='L10'>
+<a name='L11'><b>typedef</b> <b>struct</b> <a href='../S/15.html#L20' title='Defined at 20 in acseg_tree.h.'>acseg_index_s</a>  <a href='../R/35.html' title='Multiple refered from 30 places.'>acseg_index_t</a>;
+<a name='L12'>
+<a name='L13'><b>typedef</b> <b>struct</b> <a href='../S/15.html#L28' title='Defined at 28 in acseg_tree.h.'>acseg_index_item_s</a> <a href='../R/31.html' title='Multiple refered from 16 places.'>acseg_index_item_t</a>;
+<a name='L14'>
+<a name='L15'><b>typedef</b> <b>enum</b> <font color='red'>{</font>
+<a name='L16'>        <a href='../S/21.html#L56' title='Refered from 56 in acseg_tree.c.'>AC_INDEX_UNFIXED</a>,
+<a name='L17'>        <a href='../R/2.html' title='Multiple refered from 3 places.'>AC_INDEX_FIXED</a>
+<a name='L18'><font color='red'>}</font> <a href='../S/15.html#L21' title='Refered from 21 in acseg_tree.h.'>acseg_index_state</a>;
+<a name='L19'>
+<a name='L20'><b>struct</b> <a href='../S/15.html#L11' title='Refered from 11 in acseg_tree.h.'>acseg_index_s</a> <font color='red'>{</font>
+<a name='L21'>        <a href='../S/15.html#L18' title='Defined at 18 in acseg_tree.h.'>acseg_index_state</a> state;
+<a name='L22'>        <a href='../S/15.html#L13' title='Defined at 13 in acseg_tree.h.'>acseg_index_item_t</a> *root;
+<a name='L23'>
+<a name='L24'>        <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *mc;
+<a name='L25'><font color='red'>}</font>;
+<a name='L26'>
+<a name='L27'>
+<a name='L28'><b>struct</b> <a href='../S/15.html#L13' title='Refered from 13 in acseg_tree.h.'>acseg_index_item_s</a> <font color='red'>{</font>
+<a name='L29'>        <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> atom;
+<a name='L30'>
+<a name='L31'>        <a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *output;
+<a name='L32'>
+<a name='L33'>        <a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *extra_outputs;
+<a name='L34'>
+<a name='L35'>        <a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *childs_rbtree;
+<a name='L36'>
+<a name='L37'>        <a href='../S/15.html#L13' title='Defined at 13 in acseg_tree.h.'>acseg_index_item_t</a> *failure;
+<a name='L38'><font color='red'>}</font>;
+<a name='L39'>
+<a name='L40'><b>typedef</b> <b>struct</b> <font color='red'>{</font>
+<a name='L41'>        <b>unsigned</b> <b>int</b> num;
+<a name='L42'>
+<a name='L43'>        <a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list;
+<a name='L44'>        <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> *mc;
+<a name='L45'><font color='red'>}</font> <a href='../R/64.html' title='Multiple refered from 11 places.'>acseg_result_t</a>;
+<a name='L46'>
+<a name='L47'><a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> * <a href='../S/21.html#L38' title='Defined at 38 in acseg_tree.c.'>acseg_index_init</a>(<b>void</b>);
+<a name='L48'>
+<a name='L49'><a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> * <a href='../S/21.html#L88' title='Defined at 88 in acseg_tree.c.'>acseg_index_add</a>(<a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> *acseg_index, <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *phrase);
+<a name='L50'>
+<a name='L51'><a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> * <a href='../S/21.html#L154' title='Defined at 154 in acseg_tree.c.'>acseg_index_load</a>(<a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> *acseg_index, <b>const</b> <b>char</b> *fpath);
+<a name='L52'>
+<a name='L53'><b>void</b> <a href='../S/21.html#L240' title='Defined at 240 in acseg_tree.c.'>acseg_index_fix</a>(<a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> *acseg_index);
+<a name='L54'>
+<a name='L55'><b>void</b> <a href='../S/21.html#L306' title='Defined at 306 in acseg_tree.c.'>acseg_destory_index</a>(<a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> **acseg_index);
+<a name='L56'>
+<a name='L57'><a href='../S/15.html#L45' title='Defined at 45 in acseg_tree.h.'>acseg_result_t</a> * <a href='../S/21.html#L352' title='Defined at 352 in acseg_tree.c.'>acseg_full_seg</a>(<a href='../S/15.html#L11' title='Defined at 11 in acseg_tree.h.'>acseg_index_t</a> *acseg_index, <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *text);
+<a name='L58'>
+<a name='L59'><b>void</b> <a href='../S/21.html#L400' title='Defined at 400 in acseg_tree.c.'>acseg_destory_result</a>(<a href='../S/15.html#L45' title='Defined at 45 in acseg_tree.h.'>acseg_result_t</a> **result);
+<a name='L60'>
+<a name='L61'><font color='darkred'>#endif</font>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

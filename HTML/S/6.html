@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>acseg_util.h</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/acseg_util.h</h2>
+<i><font color='green'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2><a href='../J/8.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/**</font></i>
+<a name='L2'><i><font color='green'> *</font></i>
+<a name='L3'><i><font color='green'> */</font></i>
+<a name='L4'><font color='darkred'>#ifndef</font> <a href='../S/6.html#L5' title='Defined at 5 in acseg_util.h.'>ACSEG_UTIL_H_INCLUDED_</a>
+<a name='L5'><font color='darkred'>#define</font> <a href='../S/6.html#L4' title='Refered from 4 in acseg_util.h.'>ACSEG_UTIL_H_INCLUDED_</a>
+<a name='L6'>
+<a name='L7'><font color='darkred'>#include</font> &lt;string.h&gt;
+<a name='L8'><font color='darkred'>#include</font> &lt;stdlib.h&gt;
+<a name='L9'><font color='darkred'>#include</font> &lt;stdint.h&gt;
+<a name='L10'>
+<a name='L11'><font color='darkred'>#include</font> "<a href='4.html'>mem_collector.h</a>"
+<a name='L12'>
+<a name='L13'>
+<a name='L14'><b>typedef</b> <b>struct</b> <font color='red'>{</font>
+<a name='L15'>        size_t      len;
+<a name='L16'>        u_char     *data;
+<a name='L17'><font color='red'>}</font> <a href='../R/65.html' title='Multiple refered from 26 places.'>acseg_str_t</a>;
+<a name='L18'>
+<a name='L19'><b>typedef</b> <b>struct</b> <font color='red'>{</font>
+<a name='L20'>        size_t len;
+<a name='L21'>        <b>const</b> u_char *data;
+<a name='L22'><font color='red'>}</font> acseg_const_str_t;
+<a name='L23'>
+<a name='L24'><b>void</b> <a href='../S/14.html#L68' title='Defined at 68 in acseg_util.c.'>acseg_copy_str_t</a>(<a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *dest, <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *src, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc);
+<a name='L25'>
+<a name='L26'><b>unsigned</b> <b>int</b> <a href='../S/14.html#L31' title='Defined at 31 in acseg_util.c.'>get_word_size</a>(<b>const</b> <b>char</b> *word, <b>unsigned</b> <b>int</b> word_len);
+<a name='L27'>
+<a name='L28'><b>inline</b> <b>unsigned</b> <b>int</b> <a href='../S/14.html#L45' title='Defined at 45 in acseg_util.c.'>get_mblen</a>(u_char ch);
+<a name='L29'>
+<a name='L30'>uint64_t <a href='../S/14.html#L51' title='Defined at 51 in acseg_util.c.'>ord_utf8_wch</a>(<b>const</b> <b>char</b> *wch_str);
+<a name='L31'>
+<a name='L32'><i><font color='green'>/*</font></i>
+<a name='L33'><i><font color='green'> * acseg list</font></i>
+<a name='L34'><i><font color='green'> */</font></i>
+<a name='L35'><b>typedef</b> <b>struct</b> <a href='../S/6.html#L37' title='Defined at 37 in acseg_util.h.'>acseg_list_item_s</a> <a href='../R/40.html' title='Multiple refered from 11 places.'>acseg_list_item_t</a>;
+<a name='L36'>
+<a name='L37'><b>struct</b> <a href='../S/6.html#L35' title='Refered from 35 in acseg_util.h.'>acseg_list_item_s</a> <font color='red'>{</font>
+<a name='L38'>        <b>void</b> *data;
+<a name='L39'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *next;
+<a name='L40'><font color='red'>}</font>;
+<a name='L41'>
+<a name='L42'><b>typedef</b> <b>struct</b> <font color='red'>{</font>
+<a name='L43'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *first;
+<a name='L44'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *last;
+<a name='L45'><font color='red'>}</font> <a href='../R/41.html' title='Multiple refered from 19 places.'>acseg_list_t</a>;
+<a name='L46'>
+<a name='L47'><a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> * <a href='../S/14.html#L86' title='Defined at 86 in acseg_util.c.'>acseg_list_init</a>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc);
+<a name='L48'>
+<a name='L49'><b>void</b> <a href='../S/14.html#L99' title='Defined at 99 in acseg_util.c.'>acseg_list_add</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list, <b>void</b> *data, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc);
+<a name='L50'>
+<a name='L51'><b>void</b> <a href='../S/14.html#L120' title='Defined at 120 in acseg_util.c.'>acseg_list_extend</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list, <a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *added, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc);
+<a name='L52'>
+<a name='L53'>
+<a name='L54'><b>void</b> <a href='../S/14.html#L133' title='Defined at 133 in acseg_util.c.'>acseg_queue_push</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list, <b>void</b> *data, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc);
+<a name='L55'>
+<a name='L56'><b>void</b> * <a href='../S/14.html#L139' title='Defined at 139 in acseg_util.c.'>acseg_queue_pop</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list);
+<a name='L57'>
+<a name='L58'><font color='darkred'>#endif</font>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>mc_collector_t</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<pre>
+<a href='../S/21.html#L15'>mc_collector_t</a>     15 acseg_tree.c   		*rbtree_sentinel, mc_collector_t **mc)
+<a href='../S/21.html#L44'>mc_collector_t</a>     44 acseg_tree.c   	mc_collector_t *mc;
+<a href='../S/21.html#L65'>mc_collector_t</a>     65 acseg_tree.c   create_rbtree_node(acseg_rbtree_key_t key, void *data, mc_collector_t **mc)
+<a href='../S/21.html#L192'>mc_collector_t</a>    192 acseg_tree.c   		acseg_rbtree_node_t *sentinel, acseg_list_t *queue, mc_collector_t **mc)
+<a href='../S/21.html#L242'>mc_collector_t</a>    242 acseg_tree.c   	mc_collector_t *local_mc;
+<a href='../S/21.html#L315'>mc_collector_t</a>    315 acseg_tree.c   	mc_collector_t *mc;
+<a href='../S/15.html#L24'>mc_collector_t</a>     24 acseg_tree.h   	mc_collector_t *mc;
+<a href='../S/15.html#L44'>mc_collector_t</a>     44 acseg_tree.h   	mc_collector_t *mc;
+<a href='../S/14.html#L68'>mc_collector_t</a>     68 acseg_util.c   acseg_copy_str_t(acseg_str_t *dest, acseg_str_t *src, mc_collector_t **mc)
+<a href='../S/14.html#L86'>mc_collector_t</a>     86 acseg_util.c   acseg_list_init(mc_collector_t **mc)
+<a href='../S/14.html#L99'>mc_collector_t</a>     99 acseg_util.c   acseg_list_add(acseg_list_t *list, void *data, mc_collector_t **mc)
+<a href='../S/14.html#L120'>mc_collector_t</a>    120 acseg_util.c   acseg_list_extend(acseg_list_t *list, acseg_list_t *addon, mc_collector_t **mc)
+<a href='../S/14.html#L133'>mc_collector_t</a>    133 acseg_util.c   acseg_queue_push(acseg_list_t *list, void *data, mc_collector_t **mc)
+<a href='../S/6.html#L24'>mc_collector_t</a>     24 acseg_util.h   void acseg_copy_str_t(acseg_str_t *dest, acseg_str_t *src, mc_collector_t **mc);
+<a href='../S/6.html#L47'>mc_collector_t</a>     47 acseg_util.h   acseg_list_t * acseg_list_init(mc_collector_t **mc);
+<a href='../S/6.html#L49'>mc_collector_t</a>     49 acseg_util.h   void acseg_list_add(acseg_list_t *list, void *data, mc_collector_t **mc);
+<a href='../S/6.html#L51'>mc_collector_t</a>     51 acseg_util.h   void acseg_list_extend(acseg_list_t *list, acseg_list_t *added, mc_collector_t **mc);
+<a href='../S/6.html#L54'>mc_collector_t</a>     54 acseg_util.h   void acseg_queue_push(acseg_list_t *list, void *data, mc_collector_t **mc);
+<a href='../S/18.html#L12'>mc_collector_t</a>     12 mem_collector.c mc_malloc(mc_collector_t **mc, size_t size)
+<a href='../S/18.html#L14'>mc_collector_t</a>     14 mem_collector.c 	mc_collector_t *mem_block;
+<a href='../S/18.html#L16'>mc_collector_t</a>     16 mem_collector.c 	mem_block = malloc(sizeof(mc_collector_t) + size);
+<a href='../S/18.html#L32'>mc_collector_t</a>     32 mem_collector.c 	return (u_char *) mem_block + sizeof(mc_collector_t);
+<a href='../S/18.html#L36'>mc_collector_t</a>     36 mem_collector.c mc_calloc(mc_collector_t **mc, size_t size)
+<a href='../S/18.html#L51'>mc_collector_t</a>     51 mem_collector.c 	mc_collector_t *mem_block;
+<a href='../S/18.html#L53'>mc_collector_t</a>     53 mem_collector.c 	mem_block = (mc_collector_t *) ((u_char *) data - sizeof(mc_collector_t));
+<a href='../S/18.html#L65'>mc_collector_t</a>     65 mem_collector.c mc_destory(mc_collector_t *mc)
+<a href='../S/18.html#L67'>mc_collector_t</a>     67 mem_collector.c 	mc_collector_t *next, *current;
+<a href='../S/4.html#L13'>mc_collector_t</a>     13 mem_collector.h 	mc_collector_t **self;
+<a href='../S/4.html#L14'>mc_collector_t</a>     14 mem_collector.h 	mc_collector_t *next;
+<a href='../S/4.html#L17'>mc_collector_t</a>     17 mem_collector.h void* mc_malloc(mc_collector_t **mc, size_t size);
+<a href='../S/4.html#L19'>mc_collector_t</a>     19 mem_collector.h void* mc_calloc(mc_collector_t **mc, size_t size);
+<a href='../S/4.html#L23'>mc_collector_t</a>     23 mem_collector.h void mc_destory(mc_collector_t *mc);
+</pre>
+</body>
+</html>

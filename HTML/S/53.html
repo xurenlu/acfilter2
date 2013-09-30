@@ -1,0 +1,402 @@
+<html>
+<head>
+<title>acseg_rbtree.c</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/acseg_rbtree.c</h2>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L23'>[^]</a><a href='#L349'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L23' title='Defined at 23.'>acseg_rbtree_insert</a>
+<li><a href='#L98' title='Defined at 98.'>acseg_rbtree_insert_value</a>
+<li><a href='#L123' title='Defined at 123.'>acseg_rbtree_delete</a>
+<li><a href='#L290' title='Defined at 290.'>acseg_rbtree_left_rotate</a>
+<li><a href='#L320' title='Defined at 320.'>acseg_rbtree_right_rotate</a>
+<li><a href='#L349' title='Defined at 349.'>acseg_rbtree_search</a>
+</ol>
+<hr>
+<pre>
+<a name='L1'>
+<a name='L2'><i><font color='green'>/*</font></i>
+<a name='L3'><i><font color='green'> * Copy from nginx, a little change</font></i>
+<a name='L4'><i><font color='green'> */</font></i>
+<a name='L5'>
+<a name='L6'>
+<a name='L7'><font color='darkred'>#include</font> &lt;stdio.h&gt;
+<a name='L8'><font color='darkred'>#include</font> "<a href='47.html'>acseg_rbtree.h</a>"
+<a name='L9'>
+<a name='L10'><i><font color='green'>/*</font></i>
+<a name='L11'><i><font color='green'> * The red-black tree code is based on the algorithm described in</font></i>
+<a name='L12'><i><font color='green'> * the "Introduction to Algorithms" by Cormen, Leiserson and Rivest.</font></i>
+<a name='L13'><i><font color='green'> */</font></i>
+<a name='L14'>
+<a name='L15'>
+<a name='L16'><b>static</b> <b>inline</b> <b>void</b> <a href='../S/53.html#L290' title='Defined at 290 in acseg_rbtree.c.'>acseg_rbtree_left_rotate</a>(<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> **root,
+<a name='L17'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node);
+<a name='L18'><b>static</b> <b>inline</b> <b>void</b> <a href='../S/53.html#L320' title='Defined at 320 in acseg_rbtree.c.'>acseg_rbtree_right_rotate</a>(<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> **root,
+<a name='L19'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node);
+<a name='L20'>
+<a name='L21'>
+<a name='L22'><b>void</b>
+<a name='L23'><a href='../R/51.html' title='Multiple refered from 2 places.'>acseg_rbtree_insert</a>(<a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *tree, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node)
+<a name='L24'><font color='red'>{</font>
+<a name='L25'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>  **root, *temp, *sentinel;
+<a name='L26'>
+<a name='L27'>    <i><font color='green'>/* a binary tree insert */</font></i>
+<a name='L28'>
+<a name='L29'>    root = (<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> **) &amp;tree-&gt;root;
+<a name='L30'>    sentinel = tree-&gt;sentinel;
+<a name='L31'>
+<a name='L32'>    <b>if</b> (*root == sentinel) <font color='red'>{</font>
+<a name='L33'>        node-&gt;parent = NULL;
+<a name='L34'>        node-&gt;left = sentinel;
+<a name='L35'>        node-&gt;right = sentinel;
+<a name='L36'>        <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(node);
+<a name='L37'>        *root = node;
+<a name='L38'>
+<a name='L39'>        <b>return</b>;
+<a name='L40'>    <font color='red'>}</font>
+<a name='L41'>
+<a name='L42'>        <i><font color='green'>// just add new node value</font></i>
+<a name='L43'>    <b>if</b> (tree-&gt;insert(*root, node, sentinel) == NULL)<font color='red'>{</font>
+<a name='L44'>                <b>return</b>;
+<a name='L45'>        <font color='red'>}</font>
+<a name='L46'>
+<a name='L47'>    <i><font color='green'>/* re-balance tree */</font></i>
+<a name='L48'>
+<a name='L49'>    <b>while</b> (node != *root &amp;&amp; <a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(node-&gt;parent)) <font color='red'>{</font>
+<a name='L50'>
+<a name='L51'>        <b>if</b> (node-&gt;parent == node-&gt;parent-&gt;parent-&gt;left) <font color='red'>{</font>
+<a name='L52'>            temp = node-&gt;parent-&gt;parent-&gt;right;
+<a name='L53'>
+<a name='L54'>            <b>if</b> (<a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(temp)) <font color='red'>{</font>
+<a name='L55'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(node-&gt;parent);
+<a name='L56'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(temp);
+<a name='L57'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(node-&gt;parent-&gt;parent);
+<a name='L58'>                node = node-&gt;parent-&gt;parent;
+<a name='L59'>
+<a name='L60'>            <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L61'>                <b>if</b> (node == node-&gt;parent-&gt;right) <font color='red'>{</font>
+<a name='L62'>                    node = node-&gt;parent;
+<a name='L63'>                    <a href='../S/53.html#L290' title='Defined at 290 in acseg_rbtree.c.'>acseg_rbtree_left_rotate</a>(root, sentinel, node);
+<a name='L64'>                <font color='red'>}</font>
+<a name='L65'>
+<a name='L66'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(node-&gt;parent);
+<a name='L67'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(node-&gt;parent-&gt;parent);
+<a name='L68'>                <a href='../S/53.html#L320' title='Defined at 320 in acseg_rbtree.c.'>acseg_rbtree_right_rotate</a>(root, sentinel, node-&gt;parent-&gt;parent);
+<a name='L69'>            <font color='red'>}</font>
+<a name='L70'>
+<a name='L71'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L72'>            temp = node-&gt;parent-&gt;parent-&gt;left;
+<a name='L73'>
+<a name='L74'>            <b>if</b> (<a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(temp)) <font color='red'>{</font>
+<a name='L75'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(node-&gt;parent);
+<a name='L76'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(temp);
+<a name='L77'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(node-&gt;parent-&gt;parent);
+<a name='L78'>                node = node-&gt;parent-&gt;parent;
+<a name='L79'>
+<a name='L80'>            <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L81'>                <b>if</b> (node == node-&gt;parent-&gt;left) <font color='red'>{</font>
+<a name='L82'>                    node = node-&gt;parent;
+<a name='L83'>                    <a href='../S/53.html#L320' title='Defined at 320 in acseg_rbtree.c.'>acseg_rbtree_right_rotate</a>(root, sentinel, node);
+<a name='L84'>                <font color='red'>}</font>
+<a name='L85'>
+<a name='L86'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(node-&gt;parent);
+<a name='L87'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(node-&gt;parent-&gt;parent);
+<a name='L88'>                <a href='../S/53.html#L290' title='Defined at 290 in acseg_rbtree.c.'>acseg_rbtree_left_rotate</a>(root, sentinel, node-&gt;parent-&gt;parent);
+<a name='L89'>            <font color='red'>}</font>
+<a name='L90'>        <font color='red'>}</font>
+<a name='L91'>    <font color='red'>}</font>
+<a name='L92'>
+<a name='L93'>    <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(*root);
+<a name='L94'><font color='red'>}</font>
+<a name='L95'>
+<a name='L96'>
+<a name='L97'><a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *
+<a name='L98'><a href='../R/52.html' title='Multiple refered from 2 places.'>acseg_rbtree_insert_value</a>(<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *temp, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node,
+<a name='L99'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel)
+<a name='L100'><font color='red'>{</font>
+<a name='L101'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>  **p;
+<a name='L102'>
+<a name='L103'>    <b>for</b> ( ;; ) <font color='red'>{</font>
+<a name='L104'>
+<a name='L105'>        p = (node-&gt;key &lt; temp-&gt;key) ? &amp;temp-&gt;left : &amp;temp-&gt;right;
+<a name='L106'>
+<a name='L107'>        <b>if</b> (*p == sentinel) <font color='red'>{</font>
+<a name='L108'>            <b>break</b>;
+<a name='L109'>        <font color='red'>}</font>
+<a name='L110'>
+<a name='L111'>        temp = *p;
+<a name='L112'>    <font color='red'>}</font>
+<a name='L113'>
+<a name='L114'>    *p = node;
+<a name='L115'>    node-&gt;parent = temp;
+<a name='L116'>    node-&gt;left = sentinel;
+<a name='L117'>    node-&gt;right = sentinel;
+<a name='L118'>    <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(node);
+<a name='L119'>        <b>return</b> node;
+<a name='L120'><font color='red'>}</font>
+<a name='L121'>
+<a name='L122'><b>void</b>
+<a name='L123'><a href='../S/47.html#L46' title='Refered from 46 in acseg_rbtree.h.'>acseg_rbtree_delete</a>(<a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *tree, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node)
+<a name='L124'><font color='red'>{</font>
+<a name='L125'>    <b>unsigned</b> <b>int</b>  red;
+<a name='L126'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>  **root, *sentinel, *subst, *temp, *w;
+<a name='L127'>
+<a name='L128'>    <i><font color='green'>/* a binary tree delete */</font></i>
+<a name='L129'>
+<a name='L130'>    root = (<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> **) &amp;tree-&gt;root;
+<a name='L131'>    sentinel = tree-&gt;sentinel;
+<a name='L132'>
+<a name='L133'>    <b>if</b> (node-&gt;left == sentinel) <font color='red'>{</font>
+<a name='L134'>        temp = node-&gt;right;
+<a name='L135'>        subst = node;
+<a name='L136'>
+<a name='L137'>    <font color='red'>}</font> <b>else</b> <b>if</b> (node-&gt;right == sentinel) <font color='red'>{</font>
+<a name='L138'>        temp = node-&gt;left;
+<a name='L139'>        subst = node;
+<a name='L140'>
+<a name='L141'>    <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L142'>        subst = <a href='../S/47.html#L65' title='Defined at 65 in acseg_rbtree.h.'>acseg_rbtree_min</a>(node-&gt;right, sentinel);
+<a name='L143'>
+<a name='L144'>        <b>if</b> (subst-&gt;left != sentinel) <font color='red'>{</font>
+<a name='L145'>            temp = subst-&gt;left;
+<a name='L146'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L147'>            temp = subst-&gt;right;
+<a name='L148'>        <font color='red'>}</font>
+<a name='L149'>    <font color='red'>}</font>
+<a name='L150'>
+<a name='L151'>    <b>if</b> (subst == *root) <font color='red'>{</font>
+<a name='L152'>        *root = temp;
+<a name='L153'>        <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(temp);
+<a name='L154'>
+<a name='L155'>        <i><font color='green'>/* DEBUG stuff */</font></i>
+<a name='L156'>        node-&gt;left = NULL;
+<a name='L157'>        node-&gt;right = NULL;
+<a name='L158'>        node-&gt;parent = NULL;
+<a name='L159'>        node-&gt;key = 0;
+<a name='L160'>
+<a name='L161'>        <b>return</b>;
+<a name='L162'>    <font color='red'>}</font>
+<a name='L163'>
+<a name='L164'>    red = <a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(subst);
+<a name='L165'>
+<a name='L166'>    <b>if</b> (subst == subst-&gt;parent-&gt;left) <font color='red'>{</font>
+<a name='L167'>        subst-&gt;parent-&gt;left = temp;
+<a name='L168'>
+<a name='L169'>    <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L170'>        subst-&gt;parent-&gt;right = temp;
+<a name='L171'>    <font color='red'>}</font>
+<a name='L172'>
+<a name='L173'>    <b>if</b> (subst == node) <font color='red'>{</font>
+<a name='L174'>
+<a name='L175'>        temp-&gt;parent = subst-&gt;parent;
+<a name='L176'>
+<a name='L177'>    <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L178'>
+<a name='L179'>        <b>if</b> (subst-&gt;parent == node) <font color='red'>{</font>
+<a name='L180'>            temp-&gt;parent = subst;
+<a name='L181'>
+<a name='L182'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L183'>            temp-&gt;parent = subst-&gt;parent;
+<a name='L184'>        <font color='red'>}</font>
+<a name='L185'>
+<a name='L186'>        subst-&gt;left = node-&gt;left;
+<a name='L187'>        subst-&gt;right = node-&gt;right;
+<a name='L188'>        subst-&gt;parent = node-&gt;parent;
+<a name='L189'>        <a href='../S/47.html#L55' title='Defined at 55 in acseg_rbtree.h.'>acseg_rbt_copy_color</a>(subst, node);
+<a name='L190'>
+<a name='L191'>        <b>if</b> (node == *root) <font color='red'>{</font>
+<a name='L192'>            *root = subst;
+<a name='L193'>
+<a name='L194'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L195'>            <b>if</b> (node == node-&gt;parent-&gt;left) <font color='red'>{</font>
+<a name='L196'>                node-&gt;parent-&gt;left = subst;
+<a name='L197'>            <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L198'>                node-&gt;parent-&gt;right = subst;
+<a name='L199'>            <font color='red'>}</font>
+<a name='L200'>        <font color='red'>}</font>
+<a name='L201'>
+<a name='L202'>        <b>if</b> (subst-&gt;left != sentinel) <font color='red'>{</font>
+<a name='L203'>            subst-&gt;left-&gt;parent = subst;
+<a name='L204'>        <font color='red'>}</font>
+<a name='L205'>
+<a name='L206'>        <b>if</b> (subst-&gt;right != sentinel) <font color='red'>{</font>
+<a name='L207'>            subst-&gt;right-&gt;parent = subst;
+<a name='L208'>        <font color='red'>}</font>
+<a name='L209'>    <font color='red'>}</font>
+<a name='L210'>
+<a name='L211'>    <i><font color='green'>/* DEBUG stuff */</font></i>
+<a name='L212'>    node-&gt;left = NULL;
+<a name='L213'>    node-&gt;right = NULL;
+<a name='L214'>    node-&gt;parent = NULL;
+<a name='L215'>    node-&gt;key = 0;
+<a name='L216'>
+<a name='L217'>    <b>if</b> (red) <font color='red'>{</font>
+<a name='L218'>        <b>return</b>;
+<a name='L219'>    <font color='red'>}</font>
+<a name='L220'>
+<a name='L221'>    <i><font color='green'>/* a delete fixup */</font></i>
+<a name='L222'>
+<a name='L223'>    <b>while</b> (temp != *root &amp;&amp; <a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(temp)) <font color='red'>{</font>
+<a name='L224'>
+<a name='L225'>        <b>if</b> (temp == temp-&gt;parent-&gt;left) <font color='red'>{</font>
+<a name='L226'>            w = temp-&gt;parent-&gt;right;
+<a name='L227'>
+<a name='L228'>            <b>if</b> (<a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(w)) <font color='red'>{</font>
+<a name='L229'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(w);
+<a name='L230'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(temp-&gt;parent);
+<a name='L231'>                <a href='../S/53.html#L290' title='Defined at 290 in acseg_rbtree.c.'>acseg_rbtree_left_rotate</a>(root, sentinel, temp-&gt;parent);
+<a name='L232'>                w = temp-&gt;parent-&gt;right;
+<a name='L233'>            <font color='red'>}</font>
+<a name='L234'>
+<a name='L235'>            <b>if</b> (<a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(w-&gt;left) &amp;&amp; <a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(w-&gt;right)) <font color='red'>{</font>
+<a name='L236'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(w);
+<a name='L237'>                temp = temp-&gt;parent;
+<a name='L238'>
+<a name='L239'>            <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L240'>                <b>if</b> (<a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(w-&gt;right)) <font color='red'>{</font>
+<a name='L241'>                    <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(w-&gt;left);
+<a name='L242'>                    <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(w);
+<a name='L243'>                    <a href='../S/53.html#L320' title='Defined at 320 in acseg_rbtree.c.'>acseg_rbtree_right_rotate</a>(root, sentinel, w);
+<a name='L244'>                    w = temp-&gt;parent-&gt;right;
+<a name='L245'>                <font color='red'>}</font>
+<a name='L246'>
+<a name='L247'>                <a href='../S/47.html#L55' title='Defined at 55 in acseg_rbtree.h.'>acseg_rbt_copy_color</a>(w, temp-&gt;parent);
+<a name='L248'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(temp-&gt;parent);
+<a name='L249'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(w-&gt;right);
+<a name='L250'>                <a href='../S/53.html#L290' title='Defined at 290 in acseg_rbtree.c.'>acseg_rbtree_left_rotate</a>(root, sentinel, temp-&gt;parent);
+<a name='L251'>                temp = *root;
+<a name='L252'>            <font color='red'>}</font>
+<a name='L253'>
+<a name='L254'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L255'>            w = temp-&gt;parent-&gt;left;
+<a name='L256'>
+<a name='L257'>            <b>if</b> (<a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(w)) <font color='red'>{</font>
+<a name='L258'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(w);
+<a name='L259'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(temp-&gt;parent);
+<a name='L260'>                <a href='../S/53.html#L320' title='Defined at 320 in acseg_rbtree.c.'>acseg_rbtree_right_rotate</a>(root, sentinel, temp-&gt;parent);
+<a name='L261'>                w = temp-&gt;parent-&gt;left;
+<a name='L262'>            <font color='red'>}</font>
+<a name='L263'>
+<a name='L264'>            <b>if</b> (<a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(w-&gt;left) &amp;&amp; <a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(w-&gt;right)) <font color='red'>{</font>
+<a name='L265'>                <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(w);
+<a name='L266'>                temp = temp-&gt;parent;
+<a name='L267'>
+<a name='L268'>            <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L269'>                <b>if</b> (<a href='../S/47.html#L54' title='Defined at 54 in acseg_rbtree.h.'>acseg_rbt_is_black</a>(w-&gt;left)) <font color='red'>{</font>
+<a name='L270'>                    <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(w-&gt;right);
+<a name='L271'>                    <a href='../S/47.html#L51' title='Defined at 51 in acseg_rbtree.h.'>acseg_rbt_red</a>(w);
+<a name='L272'>                    <a href='../S/53.html#L290' title='Defined at 290 in acseg_rbtree.c.'>acseg_rbtree_left_rotate</a>(root, sentinel, w);
+<a name='L273'>                    w = temp-&gt;parent-&gt;left;
+<a name='L274'>                <font color='red'>}</font>
+<a name='L275'>
+<a name='L276'>                <a href='../S/47.html#L55' title='Defined at 55 in acseg_rbtree.h.'>acseg_rbt_copy_color</a>(w, temp-&gt;parent);
+<a name='L277'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(temp-&gt;parent);
+<a name='L278'>                <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(w-&gt;left);
+<a name='L279'>                <a href='../S/53.html#L320' title='Defined at 320 in acseg_rbtree.c.'>acseg_rbtree_right_rotate</a>(root, sentinel, temp-&gt;parent);
+<a name='L280'>                temp = *root;
+<a name='L281'>            <font color='red'>}</font>
+<a name='L282'>        <font color='red'>}</font>
+<a name='L283'>    <font color='red'>}</font>
+<a name='L284'>
+<a name='L285'>    <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(temp);
+<a name='L286'><font color='red'>}</font>
+<a name='L287'>
+<a name='L288'>
+<a name='L289'><b>static</b> <b>inline</b> <b>void</b>
+<a name='L290'><a href='../R/54.html' title='Multiple refered from 6 places.'>acseg_rbtree_left_rotate</a>(<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> **root, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel,
+<a name='L291'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node)
+<a name='L292'><font color='red'>{</font>
+<a name='L293'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>  *temp;
+<a name='L294'>
+<a name='L295'>    temp = node-&gt;right;
+<a name='L296'>    node-&gt;right = temp-&gt;left;
+<a name='L297'>
+<a name='L298'>    <b>if</b> (temp-&gt;left != sentinel) <font color='red'>{</font>
+<a name='L299'>        temp-&gt;left-&gt;parent = node;
+<a name='L300'>    <font color='red'>}</font>
+<a name='L301'>
+<a name='L302'>    temp-&gt;parent = node-&gt;parent;
+<a name='L303'>
+<a name='L304'>    <b>if</b> (node == *root) <font color='red'>{</font>
+<a name='L305'>        *root = temp;
+<a name='L306'>
+<a name='L307'>    <font color='red'>}</font> <b>else</b> <b>if</b> (node == node-&gt;parent-&gt;left) <font color='red'>{</font>
+<a name='L308'>        node-&gt;parent-&gt;left = temp;
+<a name='L309'>
+<a name='L310'>    <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L311'>        node-&gt;parent-&gt;right = temp;
+<a name='L312'>    <font color='red'>}</font>
+<a name='L313'>
+<a name='L314'>    temp-&gt;left = node;
+<a name='L315'>    node-&gt;parent = temp;
+<a name='L316'><font color='red'>}</font>
+<a name='L317'>
+<a name='L318'>
+<a name='L319'><b>static</b> <b>inline</b> <b>void</b>
+<a name='L320'><a href='../R/58.html' title='Multiple refered from 6 places.'>acseg_rbtree_right_rotate</a>(<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> **root, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel,
+<a name='L321'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node)
+<a name='L322'><font color='red'>{</font>
+<a name='L323'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>  *temp;
+<a name='L324'>
+<a name='L325'>    temp = node-&gt;left;
+<a name='L326'>    node-&gt;left = temp-&gt;right;
+<a name='L327'>
+<a name='L328'>    <b>if</b> (temp-&gt;right != sentinel) <font color='red'>{</font>
+<a name='L329'>        temp-&gt;right-&gt;parent = node;
+<a name='L330'>    <font color='red'>}</font>
+<a name='L331'>
+<a name='L332'>    temp-&gt;parent = node-&gt;parent;
+<a name='L333'>
+<a name='L334'>    <b>if</b> (node == *root) <font color='red'>{</font>
+<a name='L335'>        *root = temp;
+<a name='L336'>
+<a name='L337'>    <font color='red'>}</font> <b>else</b> <b>if</b> (node == node-&gt;parent-&gt;right) <font color='red'>{</font>
+<a name='L338'>        node-&gt;parent-&gt;right = temp;
+<a name='L339'>
+<a name='L340'>    <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L341'>        node-&gt;parent-&gt;left = temp;
+<a name='L342'>    <font color='red'>}</font>
+<a name='L343'>
+<a name='L344'>    temp-&gt;right = node;
+<a name='L345'>    node-&gt;parent = temp;
+<a name='L346'><font color='red'>}</font>
+<a name='L347'>
+<a name='L348'><a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *
+<a name='L349'><a href='../R/60.html' title='Multiple refered from 3 places.'>acseg_rbtree_search</a>(<a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *tree, <a href='../S/47.html#L12' title='Defined at 12 in acseg_rbtree.h.'>acseg_rbtree_key_t</a> key)
+<a name='L350'><font color='red'>{</font>
+<a name='L351'>        <b>int</b> cmp;
+<a name='L352'>
+<a name='L353'>        <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel, *tmp_node;
+<a name='L354'>
+<a name='L355'>        tmp_node = tree-&gt;root;
+<a name='L356'>        sentinel = tree-&gt;sentinel;
+<a name='L357'>    <b>for</b> ( ;; ) <font color='red'>{</font>
+<a name='L358'>                <b>if</b> (tmp_node == sentinel)<font color='red'>{</font>
+<a name='L359'>                        <b>return</b> NULL;
+<a name='L360'>                <font color='red'>}</font>
+<a name='L361'>
+<a name='L362'>                cmp = tmp_node-&gt;key - key;
+<a name='L363'>
+<a name='L364'>                <b>if</b> (cmp == 0)<font color='red'>{</font>
+<a name='L365'>                        <b>return</b> tmp_node;
+<a name='L366'>                <font color='red'>}</font> <b>else</b> <b>if</b> (cmp &gt; 0)<font color='red'>{</font>
+<a name='L367'>                        tmp_node = tmp_node-&gt;left;
+<a name='L368'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L369'>                        tmp_node = tmp_node-&gt;right;     
+<a name='L370'>                <font color='red'>}</font>
+<a name='L371'>        <font color='red'>}</font>
+<a name='L372'>
+<a name='L373'>        <b>return</b> NULL;
+<a name='L374'><font color='red'>}</font>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L23'>[^]</a><a href='#L349'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

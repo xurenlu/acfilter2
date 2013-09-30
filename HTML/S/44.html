@@ -1,0 +1,2508 @@
+<html>
+<head>
+<title>run-tests.php</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/run-tests.php</h2>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L184'>[^]</a><a href='#L2398'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L184' title='Defined at 184.'>verify_config</a>
+<li><a href='#L247' title='Defined at 247.'>write_information</a>
+<li><a href='#L316' title='Defined at 316.'>save_or_mail_results</a>
+<li><a href='#L846' title='Defined at 846.'>find_files</a>
+<li><a href='#L882' title='Defined at 882.'>test_name</a>
+<li><a href='#L891' title='Defined at 891.'>test_sort</a>
+<li><a href='#L950' title='Defined at 950.'>mail_qa_team</a>
+<li><a href='#L987' title='Defined at 987.'>save_text</a>
+<li><a href='#L1012' title='Defined at 1012.'>error_report</a>
+<li><a href='#L1029' title='Defined at 1029.'>system_with_timeout</a>
+<li><a href='#L1092' title='Defined at 1092.'>run_all_tests</a>
+<li><a href='#L1124' title='Defined at 1124.'>show_file_block</a>
+<li><a href='#L1140' title='Defined at 1140.'>binary_section</a>
+<li><a href='#L1158' title='Defined at 1158.'>run_test</a>
+<li><a href='#L1994' title='Defined at 1994.'>comp_line</a>
+<li><a href='#L2003' title='Defined at 2003.'>count_array_diff</a>
+<li><a href='#L2045' title='Defined at 2045.'>generate_array_diff</a>
+<li><a href='#L2112' title='Defined at 2112.'>generate_diff</a>
+<li><a href='#L2122' title='Defined at 2122.'>error</a>
+<li><a href='#L2128' title='Defined at 2128.'>settings2array</a>
+<li><a href='#L2152' title='Defined at 2152.'>settings2params</a>
+<li><a href='#L2172' title='Defined at 2172.'>compute_summary</a>
+<li><a href='#L2200' title='Defined at 2200.'>get_summary</a>
+<li><a href='#L2333' title='Defined at 2333.'>show_start</a>
+<li><a href='#L2345' title='Defined at 2345.'>show_end</a>
+<li><a href='#L2357' title='Defined at 2357.'>show_summary</a>
+<li><a href='#L2368' title='Defined at 2368.'>show_redirect_start</a>
+<li><a href='#L2379' title='Defined at 2379.'>show_redirect_ends</a>
+<li><a href='#L2390' title='Defined at 2390.'>show_test</a>
+<li><a href='#L2398' title='Defined at 2398.'>show_result</a>
+</ol>
+<hr>
+<pre>
+<a name='L1'>#!/usr/bin/php
+<a name='L2'>&lt;?php
+<a name='L3'><i><font color='green'>/*</font></i>
+<a name='L4'><i><font color='green'>   +----------------------------------------------------------------------+</font></i>
+<a name='L5'><i><font color='green'>   | PHP Version 5, 6                                                     |</font></i>
+<a name='L6'><i><font color='green'>   +----------------------------------------------------------------------+</font></i>
+<a name='L7'><i><font color='green'>   | Copyright (c) 1997-2010 The PHP Group                                |</font></i>
+<a name='L8'><i><font color='green'>   +----------------------------------------------------------------------+</font></i>
+<a name='L9'><i><font color='green'>   | This source file is subject to version 3.01 of the PHP license,      |</font></i>
+<a name='L10'><i><font color='green'>   | that is bundled with this package in the file LICENSE, and is        |</font></i>
+<a name='L11'><i><font color='green'>   | available through the world-wide-web at the following url:           |</font></i>
+<a name='L12'><i><font color='green'>   | http://www.php.net/license/3_01.txt                                  |</font></i>
+<a name='L13'><i><font color='green'>   | If you did not receive a copy of the PHP license and are unable to   |</font></i>
+<a name='L14'><i><font color='green'>   | obtain it through the world-wide-web, please send a note to          |</font></i>
+<a name='L15'><i><font color='green'>   | license@php.net so we can mail you a copy immediately.               |</font></i>
+<a name='L16'><i><font color='green'>   +----------------------------------------------------------------------+</font></i>
+<a name='L17'><i><font color='green'>   | Authors: Ilia Alshanetsky &lt;iliaa@php.net&gt;                            |</font></i>
+<a name='L18'><i><font color='green'>   |          Preston L. Bannister &lt;pbannister@php.net&gt;                   |</font></i>
+<a name='L19'><i><font color='green'>   |          Marcus Boerger &lt;helly@php.net&gt;                              |</font></i>
+<a name='L20'><i><font color='green'>   |          Derick Rethans &lt;derick@php.net&gt;                             |</font></i>
+<a name='L21'><i><font color='green'>   |          Sander Roobol &lt;sander@php.net&gt;                              |</font></i>
+<a name='L22'><i><font color='green'>   | (based on version by: Stig Bakken &lt;ssb@php.net&gt;)                     |</font></i>
+<a name='L23'><i><font color='green'>   | (based on the PHP 3 test framework by Rasmus Lerdorf)                |</font></i>
+<a name='L24'><i><font color='green'>   +----------------------------------------------------------------------+</font></i>
+<a name='L25'><i><font color='green'> */</font></i>
+<a name='L26'>
+<a name='L27'><i><font color='green'>/* $Id: run-tests.php 293036 2010-01-03 09:23:27Z sebastian $ */</font></i>
+<a name='L28'>
+<a name='L29'><i><font color='green'>/* Sanity check to ensure that pcre extension needed by this script is available.</font></i>
+<a name='L30'><i><font color='green'> * In the event it is not, print a nice error message indicating that this script will</font></i>
+<a name='L31'><i><font color='green'> * not run without it.</font></i>
+<a name='L32'><i><font color='green'> */</font></i>
+<a name='L33'>
+<a name='L34'><b>if</b> (!extension_loaded('pcre')) <font color='red'>{</font>
+<a name='L35'>        <b>echo</b> &lt;&lt;&lt;<b>NO_PCRE_ERROR</b>
+<a name='L36'>
+<a name='L37'>+-----------------------------------------------------------+
+<a name='L38'>|                       ! ERROR !                           |
+<a name='L39'>| The test-suite requires that you have pcre extension      |
+<a name='L40'>| enabled. To enable this extension either compile your PHP |
+<a name='L41'>| with --with-pcre-regex or if you've compiled pcre as a    |
+<a name='L42'>| shared module load it via php.ini.                        |
+<a name='L43'>+-----------------------------------------------------------+
+<a name='L44'>
+<a name='L45'><b>NO_PCRE_ERROR</b>;
+<a name='L46'><b>exit</b>;
+<a name='L47'><font color='red'>}</font>
+<a name='L48'>
+<a name='L49'><b>if</b> (!function_exists('proc_open')) <font color='red'>{</font>
+<a name='L50'>        <b>echo</b> &lt;&lt;&lt;<b>NO_PROC_OPEN_ERROR</b>
+<a name='L51'>
+<a name='L52'>+-----------------------------------------------------------+
+<a name='L53'>|                       ! ERROR !                           |
+<a name='L54'>| The test-suite requires that proc_open() is available.    |
+<a name='L55'>| Please check if you disabled it in php.ini.               |
+<a name='L56'>+-----------------------------------------------------------+
+<a name='L57'>
+<a name='L58'><b>NO_PROC_OPEN_ERROR</b>;
+<a name='L59'><b>exit</b>;
+<a name='L60'><font color='red'>}</font>
+<a name='L61'>
+<a name='L62'><i><font color='green'>// Version constants only available as of 5.2.8</font></i>
+<a name='L63'><b>if</b> (!defined("PHP_VERSION_ID")) <font color='red'>{</font>
+<a name='L64'>        <b>list</b>($major, $minor, $bug) = explode(".", phpversion(), 3);
+<a name='L65'>        $bug = (int)$bug; <i><font color='green'>// Many distros make up their own versions</font></i>
+<a name='L66'>        <b>if</b> ($bug &lt; 10) <font color='red'>{</font>
+<a name='L67'>                $bug = "0$bug";
+<a name='L68'>        <font color='red'>}</font>
+<a name='L69'>
+<a name='L70'>        <b>define</b>("PHP_VERSION_ID", "{$major}0{$minor}$bug");
+<a name='L71'>        <b>define</b>("PHP_MAJOR_VERSION", $major);
+<a name='L72'><font color='red'>}</font>
+<a name='L73'>
+<a name='L74'><i><font color='green'>// __DIR__ is available from 5.3.0</font></i>
+<a name='L75'><b>if</b> (<a href='../S/44.html#L70' title='Defined at 70 in run-tests.php.'>PHP_VERSION_ID</a> &lt; 50300) <font color='red'>{</font>
+<a name='L76'>        <b>define</b>('__DIR__', realpath(dirname(<b>__FILE__</b>)));
+<a name='L77'>        <i><font color='green'>// FILE_BINARY is available from 5.2.7</font></i>
+<a name='L78'>        <b>if</b> (<a href='../S/44.html#L70' title='Defined at 70 in run-tests.php.'>PHP_VERSION_ID</a> &lt; 50207) <font color='red'>{</font>
+<a name='L79'>                <b>define</b>('FILE_BINARY', 0);
+<a name='L80'>        <font color='red'>}</font>       
+<a name='L81'><font color='red'>}</font>
+<a name='L82'>
+<a name='L83'><i><font color='green'>// (unicode) is available from 6.0.0</font></i>
+<a name='L84'><b>if</b> (<a href='../S/44.html#L70' title='Defined at 70 in run-tests.php.'>PHP_VERSION_ID</a> &lt; 60000) <font color='red'>{</font>
+<a name='L85'>        <b>define</b>('STRING_TYPE', 'string');
+<a name='L86'><font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L87'>        <b>define</b>('STRING_TYPE', 'unicode');
+<a name='L88'><font color='red'>}</font>
+<a name='L89'>
+<a name='L90'><i><font color='green'>// If timezone is not set, use UTC.</font></i>
+<a name='L91'><b>if</b> (ini_get('date.timezone') == '') <font color='red'>{</font>
+<a name='L92'>        date_default_timezone_set('UTC');
+<a name='L93'><font color='red'>}</font>
+<a name='L94'>
+<a name='L95'><i><font color='green'>// store current directory</font></i>
+<a name='L96'>$CUR_DIR = getcwd();
+<a name='L97'>
+<a name='L98'><i><font color='green'>// change into the PHP source directory.</font></i>
+<a name='L99'>
+<a name='L100'><b>if</b> (getenv('TEST_PHP_SRCDIR')) <font color='red'>{</font>
+<a name='L101'>        @chdir(getenv('TEST_PHP_SRCDIR'));
+<a name='L102'><font color='red'>}</font>
+<a name='L103'>
+<a name='L104'><i><font color='green'>// Delete some security related environment variables</font></i>
+<a name='L105'>putenv('SSH_CLIENT=deleted');
+<a name='L106'>putenv('SSH_AUTH_SOCK=deleted');
+<a name='L107'>putenv('SSH_TTY=deleted');
+<a name='L108'>putenv('SSH_CONNECTION=deleted');
+<a name='L109'>
+<a name='L110'>$cwd = getcwd();
+<a name='L111'>set_time_limit(0);
+<a name='L112'>
+<a name='L113'>ini_set('pcre.backtrack_limit', PHP_INT_MAX);
+<a name='L114'>
+<a name='L115'>$valgrind_version = 0;
+<a name='L116'>$valgrind_header = '';
+<a name='L117'>
+<a name='L118'><i><font color='green'>// delete as much output buffers as possible</font></i>
+<a name='L119'><b>while</b>(@ob_end_clean());
+<a name='L120'><b>if</b> (ob_get_level()) <b>echo</b> "Not all buffers were deleted.\n";
+<a name='L121'>
+<a name='L122'>error_reporting(E_ALL);
+<a name='L123'><b>if</b> (<a href='../S/44.html#L71' title='Defined at 71 in run-tests.php.'>PHP_MAJOR_VERSION</a> &lt; 6) <font color='red'>{</font>
+<a name='L124'>        ini_set('magic_quotes_runtime',0); <i><font color='green'>// this would break tests by modifying EXPECT sections</font></i>
+<a name='L125'>        <b>if</b> (ini_get('safe_mode')) <font color='red'>{</font>
+<a name='L126'>                <b>echo</b> &lt;&lt;&lt; SAFE_MODE_WARNING
+<a name='L127'>
+<a name='L128'>+-----------------------------------------------------------+
+<a name='L129'>|                       ! WARNING !                         |
+<a name='L130'>| You are running the test-suite with "safe_mode" ENABLED ! |
+<a name='L131'>|                                                           |
+<a name='L132'>| Chances are high that no test will work at all,           |
+<a name='L133'>| depending on how you configured "safe_mode" !             |
+<a name='L134'>+-----------------------------------------------------------+
+<a name='L135'>
+<a name='L136'>
+<a name='L137'>SAFE_MODE_WARNING;
+<a name='L138'>        <font color='red'>}</font>
+<a name='L139'><font color='red'>}</font>
+<a name='L140'>
+<a name='L141'>$environment = isset($_ENV) ? $_ENV : <b>array</b>();
+<a name='L142'><b>if</b> ((substr(PHP_OS, 0, 3) == "WIN") &amp;&amp; <b>empty</b>($environment["SystemRoot"])) <font color='red'>{</font>
+<a name='L143'>  $environment["SystemRoot"] = getenv("SystemRoot");
+<a name='L144'><font color='red'>}</font>
+<a name='L145'>
+<a name='L146'><i><font color='green'>// Don't ever guess at the PHP executable location.</font></i>
+<a name='L147'><i><font color='green'>// Require the explicit specification.</font></i>
+<a name='L148'><i><font color='green'>// Otherwise we could end up testing the wrong file!</font></i>
+<a name='L149'>
+<a name='L150'>$php = null;
+<a name='L151'>$php_cgi = null;
+<a name='L152'>
+<a name='L153'><b>if</b> (getenv('TEST_PHP_EXECUTABLE')) <font color='red'>{</font>
+<a name='L154'>        $php = getenv('TEST_PHP_EXECUTABLE');
+<a name='L155'>
+<a name='L156'>        <b>if</b> ($php=='auto') <font color='red'>{</font>
+<a name='L157'>                $php = $cwd . '/sapi/cli/php';
+<a name='L158'>                putenv("TEST_PHP_EXECUTABLE=$php");
+<a name='L159'>
+<a name='L160'>                <b>if</b> (!getenv('TEST_PHP_CGI_EXECUTABLE')) <font color='red'>{</font>
+<a name='L161'>                        $php_cgi = $cwd . '/sapi/cgi/php-cgi';
+<a name='L162'>
+<a name='L163'>                        <b>if</b> (file_exists($php_cgi)) <font color='red'>{</font>
+<a name='L164'>                                putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+<a name='L165'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L166'>                                $php_cgi = null;
+<a name='L167'>                        <font color='red'>}</font>
+<a name='L168'>                <font color='red'>}</font>
+<a name='L169'>        <font color='red'>}</font>
+<a name='L170'>        $environment['TEST_PHP_EXECUTABLE'] = $php;
+<a name='L171'><font color='red'>}</font>
+<a name='L172'>
+<a name='L173'><b>if</b> (getenv('TEST_PHP_CGI_EXECUTABLE')) <font color='red'>{</font>
+<a name='L174'>        $php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
+<a name='L175'>
+<a name='L176'>        <b>if</b> ($php_cgi=='auto') <font color='red'>{</font>
+<a name='L177'>                $php_cgi = $cwd . '/sapi/cgi/php-cgi';
+<a name='L178'>                putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+<a name='L179'>        <font color='red'>}</font>
+<a name='L180'>
+<a name='L181'>        $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+<a name='L182'><font color='red'>}</font>
+<a name='L183'>
+<a name='L184'><b>function</b> <a href='../R/109.html' title='Multiple refered from 2 places.'>verify_config</a>()
+<a name='L185'><font color='red'>{</font>
+<a name='L186'>        <b>global</b> $php;
+<a name='L187'>
+<a name='L188'>        <b>if</b> (<b>empty</b>($php) || !file_exists($php)) <font color='red'>{</font>
+<a name='L189'>                <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>('environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!');
+<a name='L190'>        <font color='red'>}</font>
+<a name='L191'>
+<a name='L192'>        <b>if</b> (function_exists('is_executable') &amp;&amp; !is_executable($php)) <font color='red'>{</font>
+<a name='L193'>                <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = $php");
+<a name='L194'>        <font color='red'>}</font>
+<a name='L195'><font color='red'>}</font>
+<a name='L196'>
+<a name='L197'><b>if</b> (getenv('TEST_PHP_LOG_FORMAT')) <font color='red'>{</font>
+<a name='L198'>        $log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
+<a name='L199'><font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L200'>        $log_format = 'LEOD';
+<a name='L201'><font color='red'>}</font>
+<a name='L202'>
+<a name='L203'><i><font color='green'>// Check whether a detailed log is wanted.</font></i>
+<a name='L204'><b>if</b> (getenv('TEST_PHP_DETAILED')) <font color='red'>{</font>
+<a name='L205'>        $DETAILED = getenv('TEST_PHP_DETAILED');
+<a name='L206'><font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L207'>        $DETAILED = 0;
+<a name='L208'><font color='red'>}</font>
+<a name='L209'>
+<a name='L210'><i><font color='green'>// Check whether user test dirs are requested.</font></i>
+<a name='L211'><b>if</b> (getenv('TEST_PHP_USER')) <font color='red'>{</font>
+<a name='L212'>        $user_tests = explode (',', getenv('TEST_PHP_USER'));
+<a name='L213'><font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L214'>        $user_tests = <b>array</b>();
+<a name='L215'><font color='red'>}</font>
+<a name='L216'>
+<a name='L217'>$exts_to_test = <b>array</b>();
+<a name='L218'>$ini_overwrites = <b>array</b>(
+<a name='L219'>                'output_handler=',
+<a name='L220'>                'open_basedir=',
+<a name='L221'>                'safe_mode=0',
+<a name='L222'>                'disable_functions=',
+<a name='L223'>                'output_buffering=Off',
+<a name='L224'>                'error_reporting=' . (E_ALL | E_STRICT),
+<a name='L225'>                'display_errors=1',
+<a name='L226'>                'display_startup_errors=1',
+<a name='L227'>                'log_errors=0',
+<a name='L228'>                'html_errors=0',
+<a name='L229'>                'track_errors=1',
+<a name='L230'>                'report_memleaks=1',
+<a name='L231'>                'report_zend_debug=0',
+<a name='L232'>                'docref_root=',
+<a name='L233'>                'docref_ext=.html',
+<a name='L234'>                'error_prepend_string=',
+<a name='L235'>                'error_append_string=',
+<a name='L236'>                'auto_prepend_file=',
+<a name='L237'>                'auto_append_file=',
+<a name='L238'>                'magic_quotes_runtime=0',
+<a name='L239'>                'ignore_repeated_errors=0',
+<a name='L240'>                'precision=14',
+<a name='L241'>                'unicode.runtime_encoding=ISO-8859-1',
+<a name='L242'>                'unicode.script_encoding=UTF-8',
+<a name='L243'>                'unicode.output_encoding=UTF-8',
+<a name='L244'>                'unicode.from_error_mode=U_INVALID_SUBSTITUTE',
+<a name='L245'>        );
+<a name='L246'>
+<a name='L247'><b>function</b> <a href='../R/110.html' title='Multiple refered from 2 places.'>write_information</a>($show_html)
+<a name='L248'><font color='red'>{</font>
+<a name='L249'>        <b>global</b> $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header;
+<a name='L250'>
+<a name='L251'>        <i><font color='green'>// Get info from php</font></i>
+<a name='L252'>        $info_file = <a href='../S/44.html#L76' title='Defined at 76 in run-tests.php.'>__DIR__</a> . '/run-test-info.php';
+<a name='L253'>        @unlink($info_file);
+<a name='L254'>        $php_info = '&lt;?php echo "
+<a name='L255'>PHP_SAPI    : " , PHP_SAPI , "
+<a name='L256'>PHP_VERSION : " , phpversion() , "
+<a name='L257'>ZEND_VERSION: " , zend_version() , "
+<a name='L258'>PHP_OS      : " , PHP_OS , " - " , php_uname() , "
+<a name='L259'>INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
+<a name='L260'>More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?&gt;';
+<a name='L261'>        <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($info_file, $php_info);
+<a name='L262'>        $info_params = <b>array</b>();
+<a name='L263'>        <a href='../S/44.html#L2128' title='Defined at 2128 in run-tests.php.'>settings2array</a>($ini_overwrites, $info_params);
+<a name='L264'>        <a href='../S/44.html#L2152' title='Defined at 2152 in run-tests.php.'>settings2params</a>($info_params);
+<a name='L265'>        $php_info = `$php $pass_options $info_params "$info_file"`;
+<a name='L266'>        <b>define</b>('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
+<a name='L267'>
+<a name='L268'>        <b>if</b> ($php_cgi &amp;&amp; $php != $php_cgi) <font color='red'>{</font>
+<a name='L269'>                $php_info_cgi = `$php_cgi $pass_options $info_params -q "$info_file"`;
+<a name='L270'>                $php_info_sep = "\n---------------------------------------------------------------------";
+<a name='L271'>                $php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
+<a name='L272'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L273'>                $php_cgi_info = '';
+<a name='L274'>        <font color='red'>}</font>
+<a name='L275'>
+<a name='L276'>        @unlink($info_file);
+<a name='L277'>
+<a name='L278'>        <i><font color='green'>// load list of enabled extensions</font></i>
+<a name='L279'>        <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($info_file, '&lt;?php echo join(",", get_loaded_extensions()); ?&gt;');
+<a name='L280'>        $exts_to_test = explode(',',`$php $pass_options $info_params "$info_file"`);
+<a name='L281'>        <i><font color='green'>// check for extensions that need special handling and regenerate</font></i>
+<a name='L282'>        $info_params_ex = <b>array</b>(
+<a name='L283'>                'session' =&gt; <b>array</b>('session.auto_start=0'),
+<a name='L284'>                'tidy' =&gt; <b>array</b>('tidy.clean_output=0'),
+<a name='L285'>                'zlib' =&gt; <b>array</b>('zlib.output_compression=Off'),
+<a name='L286'>                'xdebug' =&gt; <b>array</b>('xdebug.default_enable=0'),
+<a name='L287'>                'mbstring' =&gt; <b>array</b>('mbstring.func_overload=0'),
+<a name='L288'>        );
+<a name='L289'>
+<a name='L290'>        <b>foreach</b>($info_params_ex <b>as</b> $ext =&gt; $ini_overwrites_ex) <font color='red'>{</font>
+<a name='L291'>                <b>if</b> (in_array($ext, $exts_to_test)) <font color='red'>{</font>
+<a name='L292'>                        $ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
+<a name='L293'>                <font color='red'>}</font>
+<a name='L294'>        <font color='red'>}</font>
+<a name='L295'>
+<a name='L296'>        @unlink($info_file);
+<a name='L297'>
+<a name='L298'>        <i><font color='green'>// Write test context information.</font></i>
+<a name='L299'>        <b>echo</b> "
+<a name='L300'>=====================================================================
+<a name='L301'>PHP         : $php $php_info $php_cgi_info
+<a name='L302'>CWD         : $cwd
+<a name='L303'>Extra dirs  : ";
+<a name='L304'>        <b>foreach</b> ($user_tests <b>as</b> $test_dir) <font color='red'>{</font>
+<a name='L305'>                <b>echo</b> "{$test_dir}\n              ";
+<a name='L306'>        <font color='red'>}</font>
+<a name='L307'>        <b>echo</b> "
+<a name='L308'>VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
+<a name='L309'>=====================================================================
+<a name='L310'>";
+<a name='L311'><font color='red'>}</font>
+<a name='L312'>
+<a name='L313'><b>define</b>('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
+<a name='L314'><b>define</b>('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
+<a name='L315'>
+<a name='L316'><b>function</b> <a href='../R/94.html' title='Multiple refered from 2 places.'>save_or_mail_results</a>()
+<a name='L317'><font color='red'>{</font>
+<a name='L318'>        <b>global</b> $sum_results, $just_save_results, $failed_test_summary,
+<a name='L319'>               $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file, $compression;
+<a name='L320'>
+<a name='L321'>        <i><font color='green'>/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */</font></i>
+<a name='L322'>        <b>if</b> (!getenv('NO_INTERACTION')) <font color='red'>{</font>
+<a name='L323'>                $fp = fopen("php://stdin", "r+");
+<a name='L324'>                <b>if</b> ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED'] || $sum_results['XFAILED']) <font color='red'>{</font>
+<a name='L325'>                        <b>echo</b> "\nYou may have found a problem in PHP.";
+<a name='L326'>                <font color='red'>}</font>
+<a name='L327'>                <b>echo</b> "\nWe would like to send this report automatically to the\n";
+<a name='L328'>                <b>echo</b> "PHP QA team, to give us a better understanding of how\nthe test cases are doing. If you don't want to send it\n";
+<a name='L329'>                <b>echo</b> "immediately, you can choose \"s\" to save the report to\na file that you can send us later.\n";
+<a name='L330'>                <b>echo</b> "Do you want to send this report now? [Yns]: ";
+<a name='L331'>                flush();
+<a name='L332'>
+<a name='L333'>                $user_input = fgets($fp, 10);
+<a name='L334'>                $just_save_results = (strtolower($user_input[0]) == 's');
+<a name='L335'>        <font color='red'>}</font>
+<a name='L336'>
+<a name='L337'>        <b>if</b> ($just_save_results || !getenv('NO_INTERACTION')) <font color='red'>{</font>
+<a name='L338'>                <b>if</b> ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') <font color='red'>{</font>
+<a name='L339'>                        <i><font color='green'>/*</font></i>
+<a name='L340'><i><font color='green'>                         * Collect information about the host system for our report</font></i>
+<a name='L341'><i><font color='green'>                         * Fetch phpinfo() output so that we can see the PHP enviroment</font></i>
+<a name='L342'><i><font color='green'>                         * Make an archive of all the failed tests</font></i>
+<a name='L343'><i><font color='green'>                         * Send an email</font></i>
+<a name='L344'><i><font color='green'>                         */</font></i>
+<a name='L345'>                        <b>if</b> ($just_save_results) <font color='red'>{</font>
+<a name='L346'>                                $user_input = 's';
+<a name='L347'>                        <font color='red'>}</font>
+<a name='L348'>
+<a name='L349'>                        <i><font color='green'>/* Ask the user to provide an email address, so that QA team can contact the user */</font></i>
+<a name='L350'>                        <b>if</b> (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) <font color='red'>{</font>
+<a name='L351'>                                <b>echo</b> "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
+<a name='L352'>                                flush();
+<a name='L353'>                                $user_email = trim(fgets($fp, 1024));
+<a name='L354'>                                $user_email = str_replace("@", " at ", str_replace(".", " dot ", $user_email));
+<a name='L355'>                        <font color='red'>}</font>
+<a name='L356'>
+<a name='L357'>                        $failed_tests_data = '';
+<a name='L358'>                        $sep = "\n" . str_repeat('=', 80) . "\n";
+<a name='L359'>                        $failed_tests_data .= $failed_test_summary . "\n";
+<a name='L360'>                        $failed_tests_data .= <a href='../S/44.html#L2200' title='Defined at 2200 in run-tests.php.'>get_summary</a>(<b>true</b>, <b>false</b>) . "\n";
+<a name='L361'>
+<a name='L362'>                        <b>if</b> ($sum_results['FAILED']) <font color='red'>{</font>
+<a name='L363'>                                <b>foreach</b> ($PHP_FAILED_TESTS['FAILED'] <b>as</b> $test_info) <font color='red'>{</font>
+<a name='L364'>                                        $failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
+<a name='L365'>                                        $failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']), <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>);
+<a name='L366'>                                        $failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']), <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>);
+<a name='L367'>                                        $failed_tests_data .= $sep . "\n\n";
+<a name='L368'>                                <font color='red'>}</font>
+<a name='L369'>                                $status = "failed";
+<a name='L370'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L371'>                                $status = "success";
+<a name='L372'>                        <font color='red'>}</font>
+<a name='L373'>
+<a name='L374'>                        $failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
+<a name='L375'>                        $failed_tests_data .= "OS:\n" . PHP_OS . " - " . php_uname() . "\n\n";
+<a name='L376'>                        $ldd = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
+<a name='L377'>
+<a name='L378'>                        <b>if</b> (substr(PHP_OS, 0, 3) != "WIN") <font color='red'>{</font>
+<a name='L379'>                                <i><font color='green'>/* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */</font></i>
+<a name='L380'>                                <b>if</b> (getenv('PHP_AUTOCONF')) <font color='red'>{</font>
+<a name='L381'>                                        $autoconf = shell_exec(getenv('PHP_AUTOCONF') . ' --version');
+<a name='L382'>                                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L383'>                                        $autoconf = shell_exec('autoconf --version');
+<a name='L384'>                                <font color='red'>}</font>
+<a name='L385'>
+<a name='L386'>                                <i><font color='green'>/* Always use the generated libtool - Mac OSX uses 'glibtool' */</font></i>
+<a name='L387'>                                $libtool = shell_exec($CUR_DIR . '/libtool --version');
+<a name='L388'>
+<a name='L389'>                                <i><font color='green'>/* Use shtool to find out if there is glibtool present (MacOSX) */</font></i>
+<a name='L390'>                                $sys_libtool_path = shell_exec(<a href='../S/44.html#L76' title='Defined at 76 in run-tests.php.'>__DIR__</a> . '/build/shtool path glibtool libtool');
+<a name='L391'>
+<a name='L392'>                                <b>if</b> ($sys_libtool_path) <font color='red'>{</font>
+<a name='L393'>                                        $sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
+<a name='L394'>                                <font color='red'>}</font>
+<a name='L395'>
+<a name='L396'>                                <i><font color='green'>/* Try the most common flags for 'version' */</font></i>
+<a name='L397'>                                $flags = <b>array</b>('-v', '-V', '--version');
+<a name='L398'>                                $cc_status = 0;
+<a name='L399'>
+<a name='L400'>                                <b>foreach</b>($flags <b>AS</b> $flag) <font color='red'>{</font>
+<a name='L401'>                                        system(getenv('CC') . " $flag &gt;/dev/null 2&gt;&amp;1", $cc_status);
+<a name='L402'>                                        <b>if</b> ($cc_status == 0) <font color='red'>{</font>
+<a name='L403'>                                                $compiler = shell_exec(getenv('CC') . " $flag 2&gt;&amp;1");
+<a name='L404'>                                                <b>break</b>;
+<a name='L405'>                                        <font color='red'>}</font>
+<a name='L406'>                                <font color='red'>}</font>
+<a name='L407'>
+<a name='L408'>                                $ldd = shell_exec("ldd $php 2&gt;/dev/null");
+<a name='L409'>                        <font color='red'>}</font>
+<a name='L410'>
+<a name='L411'>                        $failed_tests_data .= "Autoconf:\n$autoconf\n";
+<a name='L412'>                        $failed_tests_data .= "Bundled Libtool:\n$libtool\n";
+<a name='L413'>                        $failed_tests_data .= "System Libtool:\n$sys_libtool\n";
+<a name='L414'>                        $failed_tests_data .= "Compiler:\n$compiler\n";
+<a name='L415'>                        $failed_tests_data .= "Bison:\n". shell_exec('bison --version 2&gt;/dev/null') . "\n";
+<a name='L416'>                        $failed_tests_data .= "Libraries:\n$ldd\n";
+<a name='L417'>                        $failed_tests_data .= "\n";
+<a name='L418'>
+<a name='L419'>                        <b>if</b> (isset($user_email)) <font color='red'>{</font>
+<a name='L420'>                                $failed_tests_data .= "User's E-mail: " . $user_email . "\n\n";
+<a name='L421'>                        <font color='red'>}</font>
+<a name='L422'>
+<a name='L423'>                        $failed_tests_data .= $sep . "PHPINFO" . $sep;
+<a name='L424'>                        $failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2&gt; /dev/null');
+<a name='L425'>
+<a name='L426'>                        <b>if</b> ($just_save_results || !<a href='../S/44.html#L950' title='Defined at 950 in run-tests.php.'>mail_qa_team</a>($failed_tests_data, $compression, $status)) <font color='red'>{</font>
+<a name='L427'>                                file_put_contents($output_file, $failed_tests_data);
+<a name='L428'>
+<a name='L429'>                                <b>if</b> (!$just_save_results) <font color='red'>{</font>
+<a name='L430'>                                        <b>echo</b> "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
+<a name='L431'>                                <font color='red'>}</font>
+<a name='L432'>
+<a name='L433'>                                <b>echo</b> "Please send " . $output_file . " to " . <a href='../S/44.html#L313' title='Defined at 313 in run-tests.php.'>PHP_QA_EMAIL</a> . " manually, thank you.\n";
+<a name='L434'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L435'>                                fwrite($fp, "\nThank you for helping to make PHP better.\n");
+<a name='L436'>                                fclose($fp);
+<a name='L437'>                        <font color='red'>}</font>
+<a name='L438'>                <font color='red'>}</font>
+<a name='L439'>        <font color='red'>}</font>
+<a name='L440'><font color='red'>}</font>
+<a name='L441'>
+<a name='L442'><i><font color='green'>// Determine the tests to be run.</font></i>
+<a name='L443'>
+<a name='L444'>$test_files = <b>array</b>();
+<a name='L445'>$redir_tests = <b>array</b>();
+<a name='L446'>$test_results = <b>array</b>();
+<a name='L447'>$PHP_FAILED_TESTS = <b>array</b>('BORKED' =&gt; <b>array</b>(), 'FAILED' =&gt; <b>array</b>(), 'WARNED' =&gt; <b>array</b>(), 'LEAKED' =&gt; <b>array</b>(), 'XFAILED' =&gt; <b>array</b>());
+<a name='L448'>
+<a name='L449'><i><font color='green'>// If parameters given assume they represent selected tests to run.</font></i>
+<a name='L450'>$failed_tests_file= <b>false</b>;
+<a name='L451'>$pass_option_n = <b>false</b>;
+<a name='L452'>$pass_options = '';
+<a name='L453'>
+<a name='L454'>$compression = 0;
+<a name='L455'>$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
+<a name='L456'>
+<a name='L457'><b>if</b> ($compression) <font color='red'>{</font>
+<a name='L458'>        $output_file = 'compress.zlib://' . $output_file . '.gz';
+<a name='L459'><font color='red'>}</font>
+<a name='L460'>
+<a name='L461'>$just_save_results = <b>false</b>;
+<a name='L462'>$leak_check = <b>false</b>;
+<a name='L463'>$html_output = <b>false</b>;
+<a name='L464'>$html_file = null;
+<a name='L465'>$temp_source = null;
+<a name='L466'>$temp_target = null;
+<a name='L467'>$temp_urlbase = null;
+<a name='L468'>$conf_passed = null;
+<a name='L469'>$no_clean = <b>false</b>;
+<a name='L470'>
+<a name='L471'>$cfgtypes = <b>array</b>('show', 'keep');
+<a name='L472'>$cfgfiles = <b>array</b>('skip', 'php', 'clean', 'out', 'diff', 'exp');
+<a name='L473'>$cfg = <b>array</b>();
+<a name='L474'>
+<a name='L475'><b>foreach</b>($cfgtypes <b>as</b> $type) <font color='red'>{</font>
+<a name='L476'>        $cfg[$type] = <b>array</b>();
+<a name='L477'>
+<a name='L478'>        <b>foreach</b>($cfgfiles <b>as</b> $file) <font color='red'>{</font>
+<a name='L479'>                $cfg[$type][$file] = <b>false</b>;
+<a name='L480'>        <font color='red'>}</font>
+<a name='L481'><font color='red'>}</font>
+<a name='L482'>
+<a name='L483'><b>if</b> (getenv('TEST_PHP_ARGS')) <font color='red'>{</font>
+<a name='L484'>
+<a name='L485'>        <b>if</b> (!isset($argc) || !$argc || !isset($argv)) <font color='red'>{</font>
+<a name='L486'>                $argv = <b>array</b>(<b>__FILE__</b>);
+<a name='L487'>        <font color='red'>}</font>
+<a name='L488'>
+<a name='L489'>        $argv = array_merge($argv, split(' ', getenv('TEST_PHP_ARGS')));
+<a name='L490'>        $argc = count($argv);
+<a name='L491'><font color='red'>}</font>
+<a name='L492'>
+<a name='L493'><b>if</b> (isset($argc) &amp;&amp; $argc &gt; 1) <font color='red'>{</font>
+<a name='L494'>
+<a name='L495'>        <b>for</b> ($i=1; $i&lt;$argc; $i++) <font color='red'>{</font>
+<a name='L496'>                $is_switch = <b>false</b>;
+<a name='L497'>                $switch = substr($argv[$i],1,1);
+<a name='L498'>                $repeat = substr($argv[$i],0,1) == '-';
+<a name='L499'>
+<a name='L500'>                <b>while</b> ($repeat) <font color='red'>{</font>
+<a name='L501'>
+<a name='L502'>                        <b>if</b> (!$is_switch) <font color='red'>{</font>
+<a name='L503'>                                $switch = substr($argv[$i],1,1);
+<a name='L504'>                        <font color='red'>}</font>
+<a name='L505'>
+<a name='L506'>                        $is_switch = <b>true</b>;
+<a name='L507'>
+<a name='L508'>                        <b>if</b> ($repeat) <font color='red'>{</font>
+<a name='L509'>                                <b>foreach</b>($cfgtypes <b>as</b> $type) <font color='red'>{</font>
+<a name='L510'>                                        <b>if</b> (strpos($switch, '--' . $type) === 0) <font color='red'>{</font>
+<a name='L511'>                                                <b>foreach</b>($cfgfiles <b>as</b> $file) <font color='red'>{</font>
+<a name='L512'>                                                        <b>if</b> ($switch == '--' . $type . '-' . $file) <font color='red'>{</font>
+<a name='L513'>                                                                $cfg[$type][$file] = <b>true</b>;
+<a name='L514'>                                                                $is_switch = <b>false</b>;
+<a name='L515'>                                                                <b>break</b>;
+<a name='L516'>                                                        <font color='red'>}</font>
+<a name='L517'>                                                <font color='red'>}</font>
+<a name='L518'>                                        <font color='red'>}</font>
+<a name='L519'>                                <font color='red'>}</font>
+<a name='L520'>                        <font color='red'>}</font>
+<a name='L521'>
+<a name='L522'>                        <b>if</b> (!$is_switch) <font color='red'>{</font>
+<a name='L523'>                                $is_switch = <b>true</b>;
+<a name='L524'>                                <b>break</b>;
+<a name='L525'>                        <font color='red'>}</font>
+<a name='L526'>
+<a name='L527'>                        $repeat = <b>false</b>;
+<a name='L528'>
+<a name='L529'>                        <b>switch</b>($switch) <font color='red'>{</font>
+<a name='L530'>                                <b>case</b> 'r':
+<a name='L531'>                                <b>case</b> 'l':
+<a name='L532'>                                        $test_list = file($argv[++$i]);
+<a name='L533'>                                        <b>if</b> ($test_list) <font color='red'>{</font>
+<a name='L534'>                                                <b>foreach</b>($test_list <b>as</b> $test) <font color='red'>{</font>
+<a name='L535'>                                                        $matches = <b>array</b>();
+<a name='L536'>                                                        <b>if</b> (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) <font color='red'>{</font>
+<a name='L537'>                                                                $redir_tests[] = <b>array</b>($matches[1], $matches[2]);
+<a name='L538'>                                                        <font color='red'>}</font> <b>else</b> <b>if</b> (strlen($test)) <font color='red'>{</font>
+<a name='L539'>                                                                $test_files[] = trim($test);
+<a name='L540'>                                                        <font color='red'>}</font>
+<a name='L541'>                                                <font color='red'>}</font>
+<a name='L542'>                                        <font color='red'>}</font>
+<a name='L543'>                                        <b>if</b> ($switch != 'l') <font color='red'>{</font>
+<a name='L544'>                                                <b>break</b>;
+<a name='L545'>                                        <font color='red'>}</font>
+<a name='L546'>                                        $i--;
+<a name='L547'>                                        <i><font color='green'>// break left intentionally</font></i>
+<a name='L548'>                                <b>case</b> 'w':
+<a name='L549'>                                        $failed_tests_file = fopen($argv[++$i], 'w+t');
+<a name='L550'>                                        <b>break</b>;
+<a name='L551'>                                <b>case</b> 'a':
+<a name='L552'>                                        $failed_tests_file = fopen($argv[++$i], 'a+t');
+<a name='L553'>                                        <b>break</b>;
+<a name='L554'>                                <b>case</b> 'c':
+<a name='L555'>                                        $conf_passed = $argv[++$i];
+<a name='L556'>                                        <b>break</b>;
+<a name='L557'>                                <b>case</b> 'd':
+<a name='L558'>                                        $ini_overwrites[] = $argv[++$i];
+<a name='L559'>                                        <b>break</b>;
+<a name='L560'>                                <i><font color='green'>//case 'h'</font></i>
+<a name='L561'>                                <b>case</b> '--keep-all':
+<a name='L562'>                                        <b>foreach</b>($cfgfiles <b>as</b> $file) <font color='red'>{</font>
+<a name='L563'>                                                $cfg['keep'][$file] = <b>true</b>;
+<a name='L564'>                                        <font color='red'>}</font>
+<a name='L565'>                                        <b>break</b>;
+<a name='L566'>                                <i><font color='green'>//case 'l'</font></i>
+<a name='L567'>                                <b>case</b> 'm':
+<a name='L568'>                                        $leak_check = <b>true</b>;
+<a name='L569'>                                        $valgrind_cmd = "valgrind --version";
+<a name='L570'>                                        $valgrind_header = <a href='../S/44.html#L1029' title='Defined at 1029 in run-tests.php.'>system_with_timeout</a>($valgrind_cmd);
+<a name='L571'>                                        $replace_count = 0;
+<a name='L572'>                                        <b>if</b> (!$valgrind_header) <font color='red'>{</font>
+<a name='L573'>                                                <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
+<a name='L574'>                                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L575'>                                                $valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)([.-]\w+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
+<a name='L576'>                                                <b>if</b> ($replace_count != 1 || !is_numeric($valgrind_version)) <font color='red'>{</font>
+<a name='L577'>                                                        <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
+<a name='L578'>                                                <font color='red'>}</font>
+<a name='L579'>                                                $valgrind_header = trim($valgrind_header);
+<a name='L580'>                                        <font color='red'>}</font>
+<a name='L581'>                                        <b>break</b>;
+<a name='L582'>                                <b>case</b> 'n':
+<a name='L583'>                                        <b>if</b> (!$pass_option_n) <font color='red'>{</font>
+<a name='L584'>                                                $pass_options .= ' -n';
+<a name='L585'>                                        <font color='red'>}</font>
+<a name='L586'>                                        $pass_option_n = <b>true</b>;
+<a name='L587'>                                        <b>break</b>;
+<a name='L588'>                                <b>case</b> '--no-clean':
+<a name='L589'>                                        $no_clean = <b>true</b>;
+<a name='L590'>                                        <b>break</b>;
+<a name='L591'>                                <b>case</b> 'p':
+<a name='L592'>                                        $php = $argv[++$i];
+<a name='L593'>                                        putenv("TEST_PHP_EXECUTABLE=$php");
+<a name='L594'>                                        $environment['TEST_PHP_EXECUTABLE'] = $php;
+<a name='L595'>                                        <b>break</b>;
+<a name='L596'>                                <b>case</b> 'q':
+<a name='L597'>                                        putenv('NO_INTERACTION=1');
+<a name='L598'>                                        <b>break</b>;
+<a name='L599'>                                <i><font color='green'>//case 'r'</font></i>
+<a name='L600'>                                <b>case</b> 's':
+<a name='L601'>                                        $output_file = $argv[++$i];
+<a name='L602'>                                        $just_save_results = <b>true</b>;
+<a name='L603'>                                        <b>break</b>;
+<a name='L604'>                                <b>case</b> '--set-timeout':
+<a name='L605'>                                        $environment['TEST_TIMEOUT'] = $argv[++$i];
+<a name='L606'>                                        <b>break</b>;
+<a name='L607'>                                <b>case</b> '--show-all':
+<a name='L608'>                                        <b>foreach</b>($cfgfiles <b>as</b> $file) <font color='red'>{</font>
+<a name='L609'>                                                $cfg['show'][$file] = <b>true</b>;
+<a name='L610'>                                        <font color='red'>}</font>
+<a name='L611'>                                        <b>break</b>;
+<a name='L612'>                                <b>case</b> '--temp-source':
+<a name='L613'>                                        $temp_source = $argv[++$i];
+<a name='L614'>                                        <b>break</b>;
+<a name='L615'>                                <b>case</b> '--temp-target':
+<a name='L616'>                                        $temp_target = $argv[++$i];
+<a name='L617'>                                        <b>if</b> ($temp_urlbase) <font color='red'>{</font>
+<a name='L618'>                                                $temp_urlbase = $temp_target;
+<a name='L619'>                                        <font color='red'>}</font>
+<a name='L620'>                                        <b>break</b>;
+<a name='L621'>                                <b>case</b> '--temp-urlbase':
+<a name='L622'>                                        $temp_urlbase = $argv[++$i];
+<a name='L623'>                                        <b>break</b>;
+<a name='L624'>                                <b>case</b> 'v':
+<a name='L625'>                                <b>case</b> '--verbose':
+<a name='L626'>                                        $DETAILED = <b>true</b>;
+<a name='L627'>                                        <b>break</b>;
+<a name='L628'>                                <b>case</b> 'x':
+<a name='L629'>                                        $environment['SKIP_SLOW_TESTS'] = 1;
+<a name='L630'>                                        <b>break</b>;
+<a name='L631'>                                <i><font color='green'>//case 'w'</font></i>
+<a name='L632'>                                <b>case</b> '-':
+<a name='L633'>                                        <i><font color='green'>// repeat check with full switch</font></i>
+<a name='L634'>                                        $switch = $argv[$i];
+<a name='L635'>                                        <b>if</b> ($switch != '-') <font color='red'>{</font>
+<a name='L636'>                                                $repeat = <b>true</b>;
+<a name='L637'>                                        <font color='red'>}</font>
+<a name='L638'>                                        <b>break</b>;
+<a name='L639'>                                <b>case</b> '--html':
+<a name='L640'>                                        $html_file = fopen($argv[++$i], 'wt');
+<a name='L641'>                                        $html_output = is_resource($html_file);
+<a name='L642'>                                        <b>break</b>;
+<a name='L643'>                                <b>case</b> '--version':
+<a name='L644'>                                        <b>echo</b> '$Revision: 293036 $' . "\n";
+<a name='L645'>                                        <b>exit</b>(1);
+<a name='L646'>
+<a name='L647'>                                <b>default</b>:
+<a name='L648'>                                        <b>echo</b> "Illegal switch '$switch' specified!\n";
+<a name='L649'>                                <b>case</b> 'h':
+<a name='L650'>                                <b>case</b> '-help':
+<a name='L651'>                                <b>case</b> '--help':
+<a name='L652'>                                        <b>echo</b> &lt;&lt;&lt;<b>HELP</b>
+<a name='L653'><b>Synopsis</b>:
+<a name='L654'><b>    php</b> run-tests.php [options] [files] [directories]
+<a name='L655'>
+<a name='L656'><b>Options</b>:
+<a name='L657'>    -l &lt;file&gt;   Read the testfiles to be executed from &lt;file&gt;. After the test
+<a name='L658'><b>                has</b> finished all failed tests are written to the same &lt;file&gt;.
+<a name='L659'><b>                If</b> the list is empty and no further test is specified then
+<a name='L660'><b>                all</b> tests are executed (same as: -r &lt;file&gt; -w &lt;file&gt;).
+<a name='L661'>
+<a name='L662'>    -r &lt;file&gt;   Read the testfiles to be executed from &lt;file&gt;.
+<a name='L663'>
+<a name='L664'>    -w &lt;file&gt;   Write a list of all failed tests to &lt;file&gt;.
+<a name='L665'>
+<a name='L666'>    -a &lt;file&gt;   Same as -w but append rather then truncating &lt;file&gt;.
+<a name='L667'>
+<a name='L668'>    -c &lt;file&gt;   Look for php.ini in directory &lt;file&gt; or use &lt;file&gt; as ini.
+<a name='L669'>
+<a name='L670'>    -n          Pass -n option to the php binary (Do not use a php.ini).
+<a name='L671'>
+<a name='L672'>    -d foo=bar  Pass -d option to the php binary (Define INI entry foo
+<a name='L673'><b>                with</b> value 'bar').
+<a name='L674'>
+<a name='L675'>    -m          Test for memory leaks with Valgrind.
+<a name='L676'>
+<a name='L677'>    -p &lt;php&gt;    Specify PHP executable to run.
+<a name='L678'>
+<a name='L679'>    -q          Quiet, no user interaction (same as environment NO_INTERACTION).
+<a name='L680'>
+<a name='L681'>    -s &lt;file&gt;   Write output to &lt;file&gt;.
+<a name='L682'>
+<a name='L683'>    -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
+<a name='L684'>
+<a name='L685'>    --verbose
+<a name='L686'>    -v          Verbose mode.
+<a name='L687'>
+<a name='L688'>    --help
+<a name='L689'>    -h          This Help.
+<a name='L690'>
+<a name='L691'>    --html &lt;file&gt; Generate HTML output.
+<a name='L692'>
+<a name='L693'>    --temp-source &lt;sdir&gt;  --temp-target &lt;tdir&gt; [--temp-urlbase &lt;url&gt;]
+<a name='L694'><b>                Write</b> temporary files to &lt;tdir&gt; by replacing &lt;sdir&gt; from the
+<a name='L695'><b>                filenames</b> to generate with &lt;tdir&gt;. If --html is being used and
+<a name='L696'>                &lt;url&gt; given then the generated links are relative and prefixed
+<a name='L697'><b>                with</b> the given url. In general you want to make &lt;sdir&gt; the path
+<a name='L698'><b>                to</b> your source files and &lt;tdir&gt; some pach in your web page
+<a name='L699'><b>                hierarchy</b> with &lt;url&gt; pointing to &lt;tdir&gt;.
+<a name='L700'>
+<a name='L701'>    --keep-[all|php|skip|clean]
+<a name='L702'><b>                Do</b> not delete 'all' files, 'php' test file, 'skip' or 'clean'
+<a name='L703'><b>                file</b>.
+<a name='L704'>
+<a name='L705'>    --set-timeout [n]
+<a name='L706'><b>                Set</b> timeout for individual tests, where [n] is the number of
+<a name='L707'><b>                seconds</b>. The default value is 60 seconds, or 300 seconds when
+<a name='L708'><b>                testing</b> for memory leaks.
+<a name='L709'>
+<a name='L710'>    --show-[all|php|skip|clean|exp|diff|out]
+<a name='L711'><b>                Show</b> 'all' files, 'php' test file, 'skip' or 'clean' file. You
+<a name='L712'><b>                can</b> also use this to show the output 'out', the expected result
+<a name='L713'>                'exp' or the difference between them 'diff'. The result types
+<a name='L714'><b>                get</b> written independent of the log format, however 'diff' only
+<a name='L715'><b>                exists</b> when a test fails.
+<a name='L716'>
+<a name='L717'>    --no-clean  Do not execute clean section if any.
+<a name='L718'>
+<a name='L719'><b>HELP</b>;
+<a name='L720'>                                        <b>exit</b>(1);
+<a name='L721'>                        <font color='red'>}</font>
+<a name='L722'>                <font color='red'>}</font>
+<a name='L723'>
+<a name='L724'>                <b>if</b> (!$is_switch) <font color='red'>{</font>
+<a name='L725'>                        $testfile = realpath($argv[$i]);
+<a name='L726'>
+<a name='L727'>                        <b>if</b> (!$testfile &amp;&amp; strpos($argv[$i], '*') !== <b>false</b> &amp;&amp; function_exists('glob')) <font color='red'>{</font>
+<a name='L728'>
+<a name='L729'>                                <b>if</b> (preg_match("/\.phpt$/", $argv[$i])) <font color='red'>{</font>
+<a name='L730'>                                        $pattern_match = glob($argv[$i]);
+<a name='L731'>                                <font color='red'>}</font> <b>else</b> <b>if</b> (preg_match("/\*$/", $argv[$i])) <font color='red'>{</font>
+<a name='L732'>                                        $pattern_match = glob($argv[$i] . '.phpt');
+<a name='L733'>                                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L734'>                                        <b>die</b>("bogus test name " . $argv[$i] . "\n");
+<a name='L735'>                                <font color='red'>}</font>
+<a name='L736'>
+<a name='L737'>                                <b>if</b> (<b>is_array</b>($pattern_match)) <font color='red'>{</font>
+<a name='L738'>                                        $test_files = array_merge($test_files, $pattern_match);
+<a name='L739'>                                <font color='red'>}</font>
+<a name='L740'>
+<a name='L741'>                        <font color='red'>}</font> <b>else</b> <b>if</b> (is_dir($testfile)) <font color='red'>{</font>
+<a name='L742'>                                <a href='../S/44.html#L846' title='Defined at 846 in run-tests.php.'>find_files</a>($testfile);
+<a name='L743'>                        <font color='red'>}</font> <b>else</b> <b>if</b> (preg_match("/\.phpt$/", $testfile)) <font color='red'>{</font>
+<a name='L744'>                                $test_files[] = $testfile;
+<a name='L745'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L746'>                                <b>die</b>("bogus test name " . $argv[$i] . "\n");
+<a name='L747'>                        <font color='red'>}</font>
+<a name='L748'>                <font color='red'>}</font>
+<a name='L749'>        <font color='red'>}</font>
+<a name='L750'>
+<a name='L751'>        <b>if</b> (strlen($conf_passed)) <font color='red'>{</font>
+<a name='L752'>                <b>if</b> (substr(PHP_OS, 0, 3) == "WIN") <font color='red'>{</font>
+<a name='L753'>                        $pass_options .= " -c " . escapeshellarg($conf_passed);
+<a name='L754'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L755'>                        $pass_options .= " -c '$conf_passed'";
+<a name='L756'>                <font color='red'>}</font>
+<a name='L757'>        <font color='red'>}</font>
+<a name='L758'>
+<a name='L759'>        $test_files = array_unique($test_files);
+<a name='L760'>        $test_files = array_merge($test_files, $redir_tests);
+<a name='L761'>
+<a name='L762'>        <i><font color='green'>// Run selected tests.</font></i>
+<a name='L763'>        $test_cnt = count($test_files);
+<a name='L764'>
+<a name='L765'>        <b>if</b> ($test_cnt) <font color='red'>{</font>
+<a name='L766'>                putenv('NO_INTERACTION=1');
+<a name='L767'>                <a href='../S/44.html#L184' title='Defined at 184 in run-tests.php.'>verify_config</a>();
+<a name='L768'>                <a href='../S/44.html#L247' title='Defined at 247 in run-tests.php.'>write_information</a>($html_output);
+<a name='L769'>                usort($test_files, "test_sort");
+<a name='L770'>                $start_time = time();
+<a name='L771'>
+<a name='L772'>                <b>if</b> (!$html_output) <font color='red'>{</font>
+<a name='L773'>                        <b>echo</b> "Running selected tests.\n";
+<a name='L774'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L775'>                        <a href='../S/44.html#L2333' title='Defined at 2333 in run-tests.php.'>show_start</a>($start_time);
+<a name='L776'>                <font color='red'>}</font>
+<a name='L777'>
+<a name='L778'>                $test_idx = 0;
+<a name='L779'>                <a href='../S/44.html#L1092' title='Defined at 1092 in run-tests.php.'>run_all_tests</a>($test_files, $environment);
+<a name='L780'>                $end_time = time();
+<a name='L781'>
+<a name='L782'>                <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L783'>                        <a href='../S/44.html#L2345' title='Defined at 2345 in run-tests.php.'>show_end</a>($end_time);
+<a name='L784'>                <font color='red'>}</font>
+<a name='L785'>
+<a name='L786'>                <b>if</b> ($failed_tests_file) <font color='red'>{</font>
+<a name='L787'>                        fclose($failed_tests_file);
+<a name='L788'>                <font color='red'>}</font>
+<a name='L789'>
+<a name='L790'>                <b>if</b> (count($test_files) || count($test_results)) <font color='red'>{</font>
+<a name='L791'>                        <a href='../S/44.html#L2172' title='Defined at 2172 in run-tests.php.'>compute_summary</a>();
+<a name='L792'>                        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L793'>                                fwrite($html_file, "&lt;hr/&gt;\n" . <a href='../S/44.html#L2200' title='Defined at 2200 in run-tests.php.'>get_summary</a>(<b>false</b>, <b>true</b>));
+<a name='L794'>                        <font color='red'>}</font>
+<a name='L795'>                        <b>echo</b> "=====================================================================";
+<a name='L796'>                        <b>echo</b> <a href='../S/44.html#L2200' title='Defined at 2200 in run-tests.php.'>get_summary</a>(<b>false</b>, <b>false</b>);
+<a name='L797'>                <font color='red'>}</font>
+<a name='L798'>
+<a name='L799'>                <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L800'>                        fclose($html_file);
+<a name='L801'>                <font color='red'>}</font>
+<a name='L802'>
+<a name='L803'>                <b>if</b> ($output_file != '' &amp;&amp; $just_save_results) <font color='red'>{</font>
+<a name='L804'>                        <a href='../S/44.html#L316' title='Defined at 316 in run-tests.php.'>save_or_mail_results</a>();
+<a name='L805'>                <font color='red'>}</font>
+<a name='L806'>
+<a name='L807'>                <b>if</b> (getenv('REPORT_EXIT_STATUS') == 1 <b>and</b> preg_match('/FAILED(?: |$)/', implode(' ', $test_results))) <font color='red'>{</font>
+<a name='L808'>                        <b>exit</b>(1);
+<a name='L809'>                <font color='red'>}</font>
+<a name='L810'>
+<a name='L811'>                <b>exit</b>(0);
+<a name='L812'>        <font color='red'>}</font>
+<a name='L813'><font color='red'>}</font>
+<a name='L814'>
+<a name='L815'><a href='../S/44.html#L184' title='Defined at 184 in run-tests.php.'>verify_config</a>();
+<a name='L816'><a href='../S/44.html#L247' title='Defined at 247 in run-tests.php.'>write_information</a>($html_output);
+<a name='L817'>
+<a name='L818'><i><font color='green'>// Compile a list of all test files (*.phpt).</font></i>
+<a name='L819'>$test_files = <b>array</b>();
+<a name='L820'>$exts_tested = count($exts_to_test);
+<a name='L821'>$exts_skipped = 0;
+<a name='L822'>$ignored_by_ext = 0;
+<a name='L823'>sort($exts_to_test);
+<a name='L824'>$test_dirs = <b>array</b>();
+<a name='L825'>$optionals = <b>array</b>('tests', 'ext', 'Zend', 'ZendEngine2', 'sapi/cli', 'sapi/cgi');
+<a name='L826'>
+<a name='L827'><b>foreach</b>($optionals <b>as</b> $dir) <font color='red'>{</font>
+<a name='L828'>        <b>if</b> (@filetype($dir) == 'dir') <font color='red'>{</font>
+<a name='L829'>                $test_dirs[] = $dir;
+<a name='L830'>        <font color='red'>}</font>
+<a name='L831'><font color='red'>}</font>
+<a name='L832'>
+<a name='L833'><i><font color='green'>// Convert extension names to lowercase</font></i>
+<a name='L834'><b>foreach</b> ($exts_to_test <b>as</b> $key =&gt; $val) <font color='red'>{</font>
+<a name='L835'>        $exts_to_test[$key] = strtolower($val);
+<a name='L836'><font color='red'>}</font>
+<a name='L837'>
+<a name='L838'><b>foreach</b> ($test_dirs <b>as</b> $dir) <font color='red'>{</font>
+<a name='L839'>        <a href='../S/44.html#L846' title='Defined at 846 in run-tests.php.'>find_files</a>("{$cwd}/{$dir}", ($dir == 'ext'));
+<a name='L840'><font color='red'>}</font>
+<a name='L841'>
+<a name='L842'><b>foreach</b> ($user_tests <b>as</b> $dir) <font color='red'>{</font>
+<a name='L843'>        <a href='../S/44.html#L846' title='Defined at 846 in run-tests.php.'>find_files</a>($dir, ($dir == 'ext'));
+<a name='L844'><font color='red'>}</font>
+<a name='L845'>
+<a name='L846'><b>function</b> <a href='../R/77.html' title='Multiple refered from 5 places.'>find_files</a>($dir, $is_ext_dir = <b>false</b>, $ignore = <b>false</b>)
+<a name='L847'><font color='red'>{</font>
+<a name='L848'>        <b>global</b> $test_files, $exts_to_test, $ignored_by_ext, $exts_skipped, $exts_tested;
+<a name='L849'>
+<a name='L850'>        $o = opendir($dir) <b>or</b> <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("cannot open directory: $dir");
+<a name='L851'>
+<a name='L852'>        <b>while</b> (($name = readdir($o)) !== <b>false</b>) <font color='red'>{</font>
+<a name='L853'>
+<a name='L854'>                <b>if</b> (is_dir("{$dir}/{$name}") &amp;&amp; !in_array($name, <b>array</b>('.', '..', 'CVS'))) <font color='red'>{</font>
+<a name='L855'>                        $skip_ext = ($is_ext_dir &amp;&amp; !in_array(strtolower($name), $exts_to_test));
+<a name='L856'>                        <b>if</b> ($skip_ext) <font color='red'>{</font>
+<a name='L857'>                                $exts_skipped++;
+<a name='L858'>                        <font color='red'>}</font>
+<a name='L859'>                        <a href='../S/44.html#L846' title='Defined at 846 in run-tests.php.'>find_files</a>("{$dir}/{$name}", <b>false</b>, $ignore || $skip_ext);
+<a name='L860'>                <font color='red'>}</font>
+<a name='L861'>
+<a name='L862'>                <i><font color='green'>// Cleanup any left-over tmp files from last run.</font></i>
+<a name='L863'>                <b>if</b> (substr($name, -4) == '.tmp') <font color='red'>{</font>
+<a name='L864'>                        @unlink("$dir/$name");
+<a name='L865'>                        <b>continue</b>;
+<a name='L866'>                <font color='red'>}</font>
+<a name='L867'>
+<a name='L868'>                <i><font color='green'>// Otherwise we're only interested in *.phpt files.</font></i>
+<a name='L869'>                <b>if</b> (substr($name, -5) == '.phpt') <font color='red'>{</font>
+<a name='L870'>                        <b>if</b> ($ignore) <font color='red'>{</font>
+<a name='L871'>                                $ignored_by_ext++;
+<a name='L872'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L873'>                                $testfile = realpath("{$dir}/{$name}");
+<a name='L874'>                                $test_files[] = $testfile;
+<a name='L875'>                        <font color='red'>}</font>
+<a name='L876'>                <font color='red'>}</font>
+<a name='L877'>        <font color='red'>}</font>
+<a name='L878'>
+<a name='L879'>        closedir($o);
+<a name='L880'><font color='red'>}</font>
+<a name='L881'>
+<a name='L882'><b>function</b> <a href='../R/108.html' title='Multiple refered from 2 places.'>test_name</a>($name)
+<a name='L883'><font color='red'>{</font>
+<a name='L884'>        <b>if</b> (<b>is_array</b>($name)) <font color='red'>{</font>
+<a name='L885'>                <b>return</b> $name[0] . ':' . $name[1];
+<a name='L886'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L887'>                <b>return</b> $name;
+<a name='L888'>        <font color='red'>}</font>
+<a name='L889'><font color='red'>}</font>
+<a name='L890'>
+<a name='L891'><b>function</b> test_sort($a, $b)
+<a name='L892'><font color='red'>{</font>
+<a name='L893'>        <b>global</b> $cwd;
+<a name='L894'>
+<a name='L895'>        $a = <a href='../S/44.html#L882' title='Defined at 882 in run-tests.php.'>test_name</a>($a);
+<a name='L896'>        $b = <a href='../S/44.html#L882' title='Defined at 882 in run-tests.php.'>test_name</a>($b);
+<a name='L897'>
+<a name='L898'>        $ta = strpos($a, "{$cwd}/tests") === 0 ? 1 + (strpos($a, "{$cwd}/tests/run-test") === 0 ? 1 : 0) : 0;
+<a name='L899'>        $tb = strpos($b, "{$cwd}/tests") === 0 ? 1 + (strpos($b, "{$cwd}/tests/run-test") === 0 ? 1 : 0) : 0;
+<a name='L900'>
+<a name='L901'>        <b>if</b> ($ta == $tb) <font color='red'>{</font>
+<a name='L902'>                <b>return</b> strcmp($a, $b);
+<a name='L903'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L904'>                <b>return</b> $tb - $ta;
+<a name='L905'>        <font color='red'>}</font>
+<a name='L906'><font color='red'>}</font>
+<a name='L907'>
+<a name='L908'>$test_files = array_unique($test_files);
+<a name='L909'>usort($test_files, "test_sort");
+<a name='L910'>
+<a name='L911'>$start_time = time();
+<a name='L912'><a href='../S/44.html#L2333' title='Defined at 2333 in run-tests.php.'>show_start</a>($start_time);
+<a name='L913'>
+<a name='L914'>$test_cnt = count($test_files);
+<a name='L915'>$test_idx = 0;
+<a name='L916'><a href='../S/44.html#L1092' title='Defined at 1092 in run-tests.php.'>run_all_tests</a>($test_files, $environment);
+<a name='L917'>$end_time = time();
+<a name='L918'>
+<a name='L919'><b>if</b> ($failed_tests_file) <font color='red'>{</font>
+<a name='L920'>        fclose($failed_tests_file);
+<a name='L921'><font color='red'>}</font>
+<a name='L922'>
+<a name='L923'><i><font color='green'>// Summarize results</font></i>
+<a name='L924'>
+<a name='L925'><b>if</b> (0 == count($test_results)) <font color='red'>{</font>
+<a name='L926'>        <b>echo</b> "No tests were run.\n";
+<a name='L927'>        <b>return</b>;
+<a name='L928'><font color='red'>}</font>
+<a name='L929'>
+<a name='L930'><a href='../S/44.html#L2172' title='Defined at 2172 in run-tests.php.'>compute_summary</a>();
+<a name='L931'>
+<a name='L932'><a href='../S/44.html#L2345' title='Defined at 2345 in run-tests.php.'>show_end</a>($end_time);
+<a name='L933'><a href='../S/44.html#L2357' title='Defined at 2357 in run-tests.php.'>show_summary</a>();
+<a name='L934'>
+<a name='L935'><b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L936'>        fclose($html_file);
+<a name='L937'><font color='red'>}</font>
+<a name='L938'>
+<a name='L939'><a href='../S/44.html#L316' title='Defined at 316 in run-tests.php.'>save_or_mail_results</a>();
+<a name='L940'> 
+<a name='L941'><b>if</b> (getenv('REPORT_EXIT_STATUS') == 1 <b>and</b> $sum_results['FAILED']) <font color='red'>{</font>
+<a name='L942'>        <b>exit</b>(1);
+<a name='L943'><font color='red'>}</font>
+<a name='L944'><b>exit</b>(0);
+<a name='L945'>
+<a name='L946'><i><font color='green'>//</font></i>
+<a name='L947'><i><font color='green'>// Send Email to QA Team</font></i>
+<a name='L948'><i><font color='green'>//</font></i>
+<a name='L949'>
+<a name='L950'><b>function</b> <a href='../S/44.html#L426' title='Refered from 426 in run-tests.php.'>mail_qa_team</a>($data, $compression, $status = <b>false</b>)
+<a name='L951'><font color='red'>{</font>
+<a name='L952'>        $url_bits = parse_url(<a href='../S/44.html#L314' title='Defined at 314 in run-tests.php.'>QA_SUBMISSION_PAGE</a>);
+<a name='L953'>
+<a name='L954'>        <b>if</b> (<b>empty</b>($url_bits['port'])) <font color='red'>{</font>
+<a name='L955'>                $url_bits['port'] = 80;
+<a name='L956'>        <font color='red'>}</font>
+<a name='L957'>
+<a name='L958'>        $data = "php_test_data=" . urlencode(base64_encode(str_replace("\00", '[0x0]', $data)));
+<a name='L959'>        $data_length = strlen($data);
+<a name='L960'>
+<a name='L961'>        $fs = fsockopen($url_bits['host'], $url_bits['port'], $errno, $errstr, 10);
+<a name='L962'>
+<a name='L963'>        <b>if</b> (!$fs) <font color='red'>{</font>
+<a name='L964'>                <b>return</b> <b>false</b>;
+<a name='L965'>        <font color='red'>}</font>
+<a name='L966'>
+<a name='L967'>        $php_version = urlencode(<a href='../S/44.html#L266' title='Defined at 266 in run-tests.php.'>TESTED_PHP_VERSION</a>);
+<a name='L968'>
+<a name='L969'>        <b>echo</b> "\nPosting to {$url_bits['host']} {$url_bits['path']}\n";
+<a name='L970'>        fwrite($fs, "POST " . $url_bits['path'] . "?status=$status&amp;version=$php_version HTTP/1.1\r\n");
+<a name='L971'>        fwrite($fs, "Host: " . $url_bits['host'] . "\r\n");
+<a name='L972'>        fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
+<a name='L973'>        fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
+<a name='L974'>        fwrite($fs, "Content-Length: " . $data_length . "\r\n\r\n");
+<a name='L975'>        fwrite($fs, $data);
+<a name='L976'>        fwrite($fs, "\r\n\r\n");
+<a name='L977'>        fclose($fs);
+<a name='L978'>
+<a name='L979'>        <b>return</b> 1;
+<a name='L980'><font color='red'>}</font> 
+<a name='L981'>
+<a name='L982'>
+<a name='L983'><i><font color='green'>//</font></i>
+<a name='L984'><i><font color='green'>//  Write the given text to a temporary file, and return the filename.</font></i>
+<a name='L985'><i><font color='green'>//</font></i>
+<a name='L986'>
+<a name='L987'><b>function</b> <a href='../R/95.html' title='Multiple refered from 8 places.'>save_text</a>($filename, $text, $filename_copy = null)
+<a name='L988'><font color='red'>{</font>
+<a name='L989'>        <b>global</b> $DETAILED;
+<a name='L990'>
+<a name='L991'>        <b>if</b> ($filename_copy &amp;&amp; $filename_copy != $filename) <font color='red'>{</font>
+<a name='L992'>                <b>if</b> (file_put_contents($filename_copy, (binary) $text, <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>) === <b>false</b>) <font color='red'>{</font>
+<a name='L993'>                        <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot open file '" . $filename_copy . "' (save_text)");
+<a name='L994'>                <font color='red'>}</font>
+<a name='L995'>        <font color='red'>}</font>
+<a name='L996'>
+<a name='L997'>        <b>if</b> (file_put_contents($filename, (binary) $text, <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>) === <b>false</b>) <font color='red'>{</font>
+<a name='L998'>                <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot open file '" . $filename . "' (save_text)");
+<a name='L999'>        <font color='red'>}</font>
+<a name='L1000'>
+<a name='L1001'>        <b>if</b> (1 &lt; $DETAILED) <b>echo</b> "
+<a name='L1002'>FILE $filename {{{
+<a name='L1003'>$text
+<a name='L1004'>}}} 
+<a name='L1005'>";
+<a name='L1006'><font color='red'>}</font>
+<a name='L1007'>
+<a name='L1008'><i><font color='green'>//</font></i>
+<a name='L1009'><i><font color='green'>//  Write an error in a format recognizable to Emacs or MSVC.</font></i>
+<a name='L1010'><i><font color='green'>//</font></i>
+<a name='L1011'>
+<a name='L1012'><b>function</b> <a href='../S/44.html#L1971' title='Refered from 1971 in run-tests.php.'>error_report</a>($testname, $logname, $tested) 
+<a name='L1013'><font color='red'>{</font>
+<a name='L1014'>        $testname = realpath($testname);
+<a name='L1015'>        $logname  = realpath($logname);
+<a name='L1016'>
+<a name='L1017'>        <b>switch</b> (strtoupper(getenv('TEST_PHP_ERROR_STYLE'))) <font color='red'>{</font>
+<a name='L1018'>                <b>case</b> 'MSVC':
+<a name='L1019'>                        <b>echo</b> $testname . "(1) : $tested\n";
+<a name='L1020'>                        <b>echo</b> $logname . "(1) :  $tested\n";
+<a name='L1021'>                        <b>break</b>;
+<a name='L1022'>                <b>case</b> 'EMACS':
+<a name='L1023'>                        <b>echo</b> $testname . ":1: $tested\n";
+<a name='L1024'>                        <b>echo</b> $logname . ":1:  $tested\n";
+<a name='L1025'>                        <b>break</b>;
+<a name='L1026'>        <font color='red'>}</font>
+<a name='L1027'><font color='red'>}</font>
+<a name='L1028'>
+<a name='L1029'><b>function</b> <a href='../R/107.html' title='Multiple refered from 4 places.'>system_with_timeout</a>($commandline, $env = null, $stdin = null)
+<a name='L1030'><font color='red'>{</font>
+<a name='L1031'>        <b>global</b> $leak_check, $cwd;
+<a name='L1032'>
+<a name='L1033'>        $data = b'';
+<a name='L1034'>
+<a name='L1035'>        $bin_env = <b>array</b>();
+<a name='L1036'>        <b>foreach</b>((<b>array</b>)$env <b>as</b> $key =&gt; $value) <font color='red'>{</font>
+<a name='L1037'>                $bin_env[(binary)$key] = (binary)$value;
+<a name='L1038'>        <font color='red'>}</font>
+<a name='L1039'>
+<a name='L1040'>        $proc = proc_open($commandline, <b>array</b>(
+<a name='L1041'>                0 =&gt; <b>array</b>('pipe', 'r'),
+<a name='L1042'>                1 =&gt; <b>array</b>('pipe', 'w'),
+<a name='L1043'>                2 =&gt; <b>array</b>('pipe', 'w')
+<a name='L1044'>                ), $pipes, $cwd, $bin_env, <b>array</b>('suppress_errors' =&gt; <b>true</b>, 'binary_pipes' =&gt; <b>true</b>));
+<a name='L1045'>
+<a name='L1046'>        <b>if</b> (!$proc) <font color='red'>{</font>
+<a name='L1047'>                <b>return</b> <b>false</b>;
+<a name='L1048'>        <font color='red'>}</font>
+<a name='L1049'>
+<a name='L1050'>        <b>if</b> (!is_null($stdin)) <font color='red'>{</font>
+<a name='L1051'>                fwrite($pipes[0], (binary) $stdin);
+<a name='L1052'>        <font color='red'>}</font>
+<a name='L1053'>        fclose($pipes[0]);
+<a name='L1054'>        
+<a name='L1055'>        $timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
+<a name='L1056'>
+<a name='L1057'>        <b>while</b> (<b>true</b>) <font color='red'>{</font>
+<a name='L1058'>                <i><font color='green'>/* hide errors from interrupted syscalls */</font></i>
+<a name='L1059'>                $r = $pipes;
+<a name='L1060'>                $w = null;
+<a name='L1061'>                $e = null;
+<a name='L1062'>
+<a name='L1063'>                $n = @stream_select($r, $w, $e, $timeout);
+<a name='L1064'>
+<a name='L1065'>                <b>if</b> ($n === <b>false</b>) <font color='red'>{</font>
+<a name='L1066'>                        <b>break</b>;
+<a name='L1067'>                <font color='red'>}</font> <b>else</b> <b>if</b> ($n === 0) <font color='red'>{</font>
+<a name='L1068'>                        <i><font color='green'>/* timed out */</font></i>
+<a name='L1069'>                        $data .= b"\n ** ERROR: process timed out **\n";
+<a name='L1070'>                        proc_terminate($proc);
+<a name='L1071'>                        <b>return</b> $data;
+<a name='L1072'>                <font color='red'>}</font> <b>else</b> <b>if</b> ($n &gt; 0) <font color='red'>{</font>
+<a name='L1073'>                        $line = (binary) fread($pipes[1], 8192);
+<a name='L1074'>                        <b>if</b> (strlen($line) == 0) <font color='red'>{</font>
+<a name='L1075'>                                <i><font color='green'>/* EOF */</font></i>
+<a name='L1076'>                                <b>break</b>;
+<a name='L1077'>                        <font color='red'>}</font>
+<a name='L1078'>                        $data .= $line;
+<a name='L1079'>                <font color='red'>}</font>
+<a name='L1080'>        <font color='red'>}</font>
+<a name='L1081'>
+<a name='L1082'>        $stat = proc_get_status($proc);
+<a name='L1083'>
+<a name='L1084'>        <b>if</b> ($stat['signaled']) <font color='red'>{</font>
+<a name='L1085'>                $data .= b"\nTermsig=" . $stat['stopsig'];
+<a name='L1086'>        <font color='red'>}</font>
+<a name='L1087'>
+<a name='L1088'>        $code = proc_close($proc);
+<a name='L1089'>        <b>return</b> $data;
+<a name='L1090'><font color='red'>}</font>
+<a name='L1091'>
+<a name='L1092'><b>function</b> <a href='../R/92.html' title='Multiple refered from 3 places.'>run_all_tests</a>($test_files, $env, $redir_tested = null)
+<a name='L1093'><font color='red'>{</font>
+<a name='L1094'>        <b>global</b> $test_results, $failed_tests_file, $php, $test_cnt, $test_idx;
+<a name='L1095'>
+<a name='L1096'>        <b>foreach</b>($test_files <b>as</b> $name) <font color='red'>{</font>
+<a name='L1097'>
+<a name='L1098'>                <b>if</b> (<b>is_array</b>($name)) <font color='red'>{</font>
+<a name='L1099'>                        $index = "# $name[1]: $name[0]";
+<a name='L1100'>
+<a name='L1101'>                        <b>if</b> ($redir_tested) <font color='red'>{</font>
+<a name='L1102'>                                $name = $name[0];
+<a name='L1103'>                        <font color='red'>}</font>
+<a name='L1104'>                <font color='red'>}</font> <b>else</b> <b>if</b> ($redir_tested) <font color='red'>{</font>
+<a name='L1105'>                        $index = "# $redir_tested: $name";
+<a name='L1106'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1107'>                        $index = $name;
+<a name='L1108'>                <font color='red'>}</font>
+<a name='L1109'>                $test_idx++;
+<a name='L1110'>                $result = <a href='../S/44.html#L1158' title='Defined at 1158 in run-tests.php.'>run_test</a>($php, $name, $env);
+<a name='L1111'>
+<a name='L1112'>                <b>if</b> (!<b>is_array</b>($name) &amp;&amp; $result != 'REDIR') <font color='red'>{</font>
+<a name='L1113'>                        $test_results[$index] = $result;
+<a name='L1114'>                        <b>if</b> ($failed_tests_file &amp;&amp; ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) <font color='red'>{</font>
+<a name='L1115'>                                fwrite($failed_tests_file, "$index\n");
+<a name='L1116'>                        <font color='red'>}</font>
+<a name='L1117'>                <font color='red'>}</font>
+<a name='L1118'>        <font color='red'>}</font>
+<a name='L1119'><font color='red'>}</font>
+<a name='L1120'>
+<a name='L1121'><i><font color='green'>//</font></i>
+<a name='L1122'><i><font color='green'>//  Show file or result block</font></i>
+<a name='L1123'><i><font color='green'>//</font></i>
+<a name='L1124'><b>function</b> <a href='../R/100.html' title='Multiple refered from 7 places.'>show_file_block</a>($file, $block, $section = null)
+<a name='L1125'><font color='red'>{</font>
+<a name='L1126'>        <b>global</b> $cfg;
+<a name='L1127'>
+<a name='L1128'>        <b>if</b> ($cfg['show'][$file]) <font color='red'>{</font>
+<a name='L1129'>
+<a name='L1130'>                <b>if</b> (is_null($section)) <font color='red'>{</font>
+<a name='L1131'>                        $section = strtoupper($file);
+<a name='L1132'>                <font color='red'>}</font>
+<a name='L1133'>
+<a name='L1134'>                <b>echo</b> "\n========" . $section . "========\n";
+<a name='L1135'>                <b>echo</b> rtrim($block);
+<a name='L1136'>                <b>echo</b> "\n========DONE========\n";
+<a name='L1137'>        <font color='red'>}</font>
+<a name='L1138'><font color='red'>}</font>
+<a name='L1139'>
+<a name='L1140'><b>function</b> <a href='../R/68.html' title='Multiple refered from 2 places.'>binary_section</a>($section)
+<a name='L1141'><font color='red'>{</font>
+<a name='L1142'>        <b>return</b> <a href='../S/44.html#L71' title='Defined at 71 in run-tests.php.'>PHP_MAJOR_VERSION</a> &lt; 6 || 
+<a name='L1143'>                (
+<a name='L1144'>                        $section == 'FILE'                      ||
+<a name='L1145'>                $section == 'FILEEOF'           ||
+<a name='L1146'>                        $section == 'EXPECT'            ||
+<a name='L1147'>                        $section == 'EXPECTF'           ||
+<a name='L1148'>                        $section == 'EXPECTREGEX'       ||
+<a name='L1149'>                        $section == 'EXPECTHEADERS'     ||
+<a name='L1150'>                        $section == 'SKIPIF'            ||
+<a name='L1151'>                        $section == 'CLEAN'
+<a name='L1152'>                );
+<a name='L1153'><font color='red'>}</font>
+<a name='L1154'>
+<a name='L1155'><i><font color='green'>//</font></i>
+<a name='L1156'><i><font color='green'>//  Run an individual test case.</font></i>
+<a name='L1157'><i><font color='green'>//</font></i>
+<a name='L1158'><b>function</b> <a href='../S/44.html#L1110' title='Refered from 1110 in run-tests.php.'>run_test</a>($php, $file, $env)
+<a name='L1159'><font color='red'>{</font>
+<a name='L1160'>        <b>global</b> $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
+<a name='L1161'>        <b>global</b> $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
+<a name='L1162'>        <b>global</b> $leak_check, $temp_source, $temp_target, $cfg, $environment;
+<a name='L1163'>        <b>global</b> $no_clean;
+<a name='L1164'>        <b>global</b> $valgrind_version;
+<a name='L1165'>        $temp_filenames = null;
+<a name='L1166'>        $org_file = $file;
+<a name='L1167'>
+<a name='L1168'>        <b>if</b> (isset($env['TEST_PHP_CGI_EXECUTABLE'])) <font color='red'>{</font>
+<a name='L1169'>                $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
+<a name='L1170'>        <font color='red'>}</font>
+<a name='L1171'>
+<a name='L1172'>        <b>if</b> (<b>is_array</b>($file)) <font color='red'>{</font>
+<a name='L1173'>                $file = $file[0];
+<a name='L1174'>        <font color='red'>}</font>
+<a name='L1175'>
+<a name='L1176'>        <b>if</b> ($DETAILED) <b>echo</b> "
+<a name='L1177'>=================
+<a name='L1178'>TEST $file
+<a name='L1179'>";
+<a name='L1180'>
+<a name='L1181'>        <i><font color='green'>// Load the sections of the test file.</font></i>
+<a name='L1182'>        $section_text = <b>array</b>('TEST' =&gt; '');
+<a name='L1183'>
+<a name='L1184'>        $fp = fopen($file, "rb") <b>or</b> <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot open test file: $file");
+<a name='L1185'>
+<a name='L1186'>        $borked = <b>false</b>;
+<a name='L1187'>        $bork_info = '';
+<a name='L1188'>
+<a name='L1189'>        <b>if</b> (!feof($fp)) <font color='red'>{</font>
+<a name='L1190'>                $line = fgets($fp);
+<a name='L1191'>
+<a name='L1192'>                <b>if</b> ($line === <b>false</b>) <font color='red'>{</font>
+<a name='L1193'>                        $bork_info = "cannot read test";
+<a name='L1194'>                        $borked = <b>true</b>;
+<a name='L1195'>                <font color='red'>}</font>
+<a name='L1196'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1197'>                $bork_info = "empty test [$file]";
+<a name='L1198'>                $borked = <b>true</b>;
+<a name='L1199'>        <font color='red'>}</font>
+<a name='L1200'>        <b>if</b> (!$borked &amp;&amp; strncmp('--TEST--', $line, 8)) <font color='red'>{</font>
+<a name='L1201'>                $bork_info = "tests must start with --TEST-- [$file]";
+<a name='L1202'>                $borked = <b>true</b>;
+<a name='L1203'>        <font color='red'>}</font>
+<a name='L1204'>
+<a name='L1205'>        $section = 'TEST';
+<a name='L1206'>        $secfile = <b>false</b>;
+<a name='L1207'>        $secdone = <b>false</b>;
+<a name='L1208'>
+<a name='L1209'>        <b>while</b> (!feof($fp)) <font color='red'>{</font>
+<a name='L1210'>                $line = fgets($fp);
+<a name='L1211'>
+<a name='L1212'>                <b>if</b> ($line === <b>false</b>) <font color='red'>{</font>
+<a name='L1213'>                        <b>break</b>;
+<a name='L1214'>                <font color='red'>}</font>
+<a name='L1215'>
+<a name='L1216'>                <i><font color='green'>// Match the beginning of a section.</font></i>
+<a name='L1217'>                <b>if</b> (preg_match(b'/^--([_A-Z]+)--/', $line, $r)) <font color='red'>{</font>
+<a name='L1218'>                        $section = $r[1];
+<a name='L1219'>                        settype($section, <a href='../D/39.html' title='Multiple defined in 2 places.'>STRING_TYPE</a>);
+<a name='L1220'>
+<a name='L1221'>                        <b>if</b> (isset($section_text[$section])) <font color='red'>{</font>
+<a name='L1222'>                                $bork_info = "duplicated $section section";
+<a name='L1223'>                                $borked    = <b>true</b>;
+<a name='L1224'>                        <font color='red'>}</font>
+<a name='L1225'>
+<a name='L1226'>                        $section_text[$section] = <a href='../S/44.html#L1140' title='Defined at 1140 in run-tests.php.'>binary_section</a>($section) ? b'' : '';
+<a name='L1227'>                        $secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
+<a name='L1228'>                        $secdone = <b>false</b>;
+<a name='L1229'>                        <b>continue</b>;
+<a name='L1230'>                <font color='red'>}</font>
+<a name='L1231'>
+<a name='L1232'>                <b>if</b> (!<a href='../S/44.html#L1140' title='Defined at 1140 in run-tests.php.'>binary_section</a>($section)) <font color='red'>{</font>
+<a name='L1233'>                        $line = unicode_decode($line, "utf-8");
+<a name='L1234'>                        <b>if</b> ($line == <b>false</b>) <font color='red'>{</font>
+<a name='L1235'>                                $bork_info = "cannot read test";
+<a name='L1236'>                                $borked = <b>true</b>;
+<a name='L1237'>                                <b>break</b>;
+<a name='L1238'>                        <font color='red'>}</font>
+<a name='L1239'>                <font color='red'>}</font>
+<a name='L1240'>
+<a name='L1241'>                <i><font color='green'>// Add to the section text.</font></i>
+<a name='L1242'>                <b>if</b> (!$secdone) <font color='red'>{</font>
+<a name='L1243'>                        $section_text[$section] .= $line;
+<a name='L1244'>                <font color='red'>}</font>
+<a name='L1245'>
+<a name='L1246'>                <i><font color='green'>// End of actual test?</font></i>
+<a name='L1247'>                <b>if</b> ($secfile &amp;&amp; preg_match(b'/^===DONE===\s*$/', $line)) <font color='red'>{</font>
+<a name='L1248'>                        $secdone = <b>true</b>;
+<a name='L1249'>                <font color='red'>}</font>
+<a name='L1250'>        <font color='red'>}</font>
+<a name='L1251'>
+<a name='L1252'>        <i><font color='green'>// the redirect section allows a set of tests to be reused outside of</font></i>
+<a name='L1253'>        <i><font color='green'>// a given test dir</font></i>
+<a name='L1254'>        <b>if</b> (!$borked) <font color='red'>{</font>
+<a name='L1255'>                <b>if</b> (@count($section_text['REDIRECTTEST']) == 1) <font color='red'>{</font>
+<a name='L1256'>
+<a name='L1257'>                        <b>if</b> ($IN_REDIRECT) <font color='red'>{</font>
+<a name='L1258'>                                $borked = <b>true</b>;
+<a name='L1259'>                                $bork_info = "Can't redirect a test from within a redirected test";
+<a name='L1260'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1261'>                                $borked = <b>false</b>;
+<a name='L1262'>                        <font color='red'>}</font>
+<a name='L1263'>
+<a name='L1264'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1265'>
+<a name='L1266'>                        <b>if</b> (@count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) <font color='red'>{</font>
+<a name='L1267'>                                $bork_info = "missing section --FILE--";
+<a name='L1268'>                                $borked = <b>true</b>;
+<a name='L1269'>                        <font color='red'>}</font>
+<a name='L1270'>
+<a name='L1271'>                        <b>if</b> (@count($section_text['FILEEOF']) == 1) <font color='red'>{</font>
+<a name='L1272'>                                $section_text['FILE'] = preg_replace(b"/[\r\n]+$/", b'', $section_text['FILEEOF']);
+<a name='L1273'>                                <b>unset</b>($section_text['FILEEOF']);
+<a name='L1274'>                        <font color='red'>}</font>
+<a name='L1275'>
+<a name='L1276'>                        <b>if</b> (@count($section_text['FILE_EXTERNAL']) == 1) <font color='red'>{</font>
+<a name='L1277'>                                <i><font color='green'>// don't allow tests to retrieve files from anywhere but this subdirectory</font></i>
+<a name='L1278'>                                $section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
+<a name='L1279'>
+<a name='L1280'>                                <b>if</b> (file_exists($section_text['FILE_EXTERNAL'])) <font color='red'>{</font>
+<a name='L1281'>                                        $section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL'], <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>);
+<a name='L1282'>                                        <b>unset</b>($section_text['FILE_EXTERNAL']);
+<a name='L1283'>                                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1284'>                                        $bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
+<a name='L1285'>                                        $borked = <b>true</b>;
+<a name='L1286'>                                <font color='red'>}</font>
+<a name='L1287'>                        <font color='red'>}</font>
+<a name='L1288'>
+<a name='L1289'>                        <b>if</b> ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) <font color='red'>{</font>
+<a name='L1290'>                                $bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
+<a name='L1291'>                                $borked = <b>true</b>;
+<a name='L1292'>                        <font color='red'>}</font>
+<a name='L1293'>                <font color='red'>}</font>
+<a name='L1294'>        <font color='red'>}</font>
+<a name='L1295'>        fclose($fp);
+<a name='L1296'>
+<a name='L1297'>        $shortname = str_replace($cwd . '/', '', $file);
+<a name='L1298'>        $tested_file = $shortname;
+<a name='L1299'>
+<a name='L1300'>        <b>if</b> ($borked) <font color='red'>{</font>
+<a name='L1301'>                <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>("BORK", $bork_info, $tested_file);
+<a name='L1302'>                $PHP_FAILED_TESTS['BORKED'][] = <b>array</b> (
+<a name='L1303'>                                                                'name'      =&gt; $file,
+<a name='L1304'>                                                                'test_name' =&gt; '',
+<a name='L1305'>                                                                'output'    =&gt; '',
+<a name='L1306'>                                                                'diff'      =&gt; '',
+<a name='L1307'>                                                                'info'      =&gt; "$bork_info [$file]",
+<a name='L1308'>                );
+<a name='L1309'>                <b>return</b> 'BORKED';
+<a name='L1310'>        <font color='red'>}</font>
+<a name='L1311'>
+<a name='L1312'>        $tested = trim($section_text['TEST']);
+<a name='L1313'>
+<a name='L1314'>        <i><font color='green'>/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */</font></i>
+<a name='L1315'>        <b>if</b> (!<b>empty</b>($section_text['GET']) || !<b>empty</b>($section_text['POST']) || !<b>empty</b>($section_text['POST_RAW']) || !<b>empty</b>($section_text['COOKIE']) || !<b>empty</b>($section_text['EXPECTHEADERS'])) <font color='red'>{</font>
+<a name='L1316'>                <b>if</b> (isset($php_cgi)) <font color='red'>{</font>
+<a name='L1317'>                        $old_php = $php;
+<a name='L1318'>                        $php = $php_cgi . ' -C ';
+<a name='L1319'>                <font color='red'>}</font> <b>else</b> <b>if</b> (!strncasecmp(PHP_OS, "win", 3) &amp;&amp; file_exists(dirname($php) . "/php-cgi.exe")) <font color='red'>{</font>
+<a name='L1320'>                        $old_php = $php;
+<a name='L1321'>                        $php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
+<a name='L1322'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1323'>                        <b>if</b> (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) <font color='red'>{</font>
+<a name='L1324'>                                $old_php = $php;
+<a name='L1325'>                                $php = realpath(dirname($php) . "/../../sapi/cgi/php-cgi") . ' -C ';
+<a name='L1326'>                        <font color='red'>}</font> <b>else</b> <b>if</b> (file_exists("./sapi/cgi/php-cgi")) <font color='red'>{</font>
+<a name='L1327'>                                $old_php = $php;
+<a name='L1328'>                                $php = realpath("./sapi/cgi/php-cgi") . ' -C ';
+<a name='L1329'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1330'>                                <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>('SKIP', $tested, $tested_file, "reason: CGI not available");
+<a name='L1331'>                                <b>return</b> 'SKIPPED';
+<a name='L1332'>                        <font color='red'>}</font>
+<a name='L1333'>                <font color='red'>}</font>
+<a name='L1334'>        <font color='red'>}</font>
+<a name='L1335'>
+<a name='L1336'>        <a href='../S/44.html#L2390' title='Defined at 2390 in run-tests.php.'>show_test</a>($test_idx, $shortname);
+<a name='L1337'>
+<a name='L1338'>        <b>if</b> (<b>is_array</b>($IN_REDIRECT)) <font color='red'>{</font>
+<a name='L1339'>                $temp_dir = $test_dir = $IN_REDIRECT['dir'];
+<a name='L1340'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1341'>                $temp_dir = $test_dir = realpath(dirname($file));
+<a name='L1342'>        <font color='red'>}</font>
+<a name='L1343'>
+<a name='L1344'>        <b>if</b> ($temp_source &amp;&amp; $temp_target) <font color='red'>{</font>
+<a name='L1345'>                $temp_dir = str_replace($temp_source, $temp_target, $temp_dir);
+<a name='L1346'>        <font color='red'>}</font>
+<a name='L1347'>
+<a name='L1348'>        $main_file_name = basename($file,'phpt');
+<a name='L1349'>
+<a name='L1350'>        $diff_filename     = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'diff';
+<a name='L1351'>        $log_filename      = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'log';
+<a name='L1352'>        $exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
+<a name='L1353'>        $output_filename   = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
+<a name='L1354'>        $memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
+<a name='L1355'>        $temp_file         = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
+<a name='L1356'>        $test_file         = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
+<a name='L1357'>        $temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
+<a name='L1358'>        $test_skipif       = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
+<a name='L1359'>        $temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
+<a name='L1360'>        $test_clean        = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
+<a name='L1361'>        $tmp_post          = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+<a name='L1362'>        $tmp_relative_file = str_replace(<a href='../S/44.html#L76' title='Defined at 76 in run-tests.php.'>__DIR__</a> . DIRECTORY_SEPARATOR, '', $test_file) . 't';
+<a name='L1363'>
+<a name='L1364'>        <b>if</b> ($temp_source &amp;&amp; $temp_target) <font color='red'>{</font>
+<a name='L1365'>                $temp_skipif  .= 's';
+<a name='L1366'>                $temp_file    .= 's';
+<a name='L1367'>                $temp_clean   .= 's';
+<a name='L1368'>                $copy_file     = $temp_dir . DIRECTORY_SEPARATOR . basename(<b>is_array</b>($file) ? $file[1] : $file) . '.phps';
+<a name='L1369'>
+<a name='L1370'>                <b>if</b> (!is_dir(dirname($copy_file))) <font color='red'>{</font>
+<a name='L1371'>                        mkdir(dirname($copy_file), 0777, <b>true</b>) <b>or</b> <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot create output directory - " . dirname($copy_file));
+<a name='L1372'>                <font color='red'>}</font>
+<a name='L1373'>
+<a name='L1374'>                <b>if</b> (isset($section_text['FILE'])) <font color='red'>{</font>
+<a name='L1375'>                        <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($copy_file, $section_text['FILE']);
+<a name='L1376'>                <font color='red'>}</font>
+<a name='L1377'>
+<a name='L1378'>                $temp_filenames = <b>array</b>(
+<a name='L1379'>                        'file' =&gt; $copy_file,
+<a name='L1380'>                        'diff' =&gt; $diff_filename,
+<a name='L1381'>                        'log'  =&gt; $log_filename,
+<a name='L1382'>                        'exp'  =&gt; $exp_filename,
+<a name='L1383'>                        'out'  =&gt; $output_filename,
+<a name='L1384'>                        'mem'  =&gt; $memcheck_filename,
+<a name='L1385'>                        'php'  =&gt; $temp_file,
+<a name='L1386'>                        'skip' =&gt; $temp_skipif,
+<a name='L1387'>                        'clean'=&gt; $temp_clean);
+<a name='L1388'>        <font color='red'>}</font>
+<a name='L1389'>
+<a name='L1390'>        <b>if</b> (<b>is_array</b>($IN_REDIRECT)) <font color='red'>{</font>
+<a name='L1391'>                $tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']);
+<a name='L1392'>                $tested_file = $tmp_relative_file;
+<a name='L1393'>        <font color='red'>}</font>
+<a name='L1394'>
+<a name='L1395'>        <i><font color='green'>// unlink old test results</font></i>
+<a name='L1396'>        @unlink($diff_filename);
+<a name='L1397'>        @unlink($log_filename);
+<a name='L1398'>        @unlink($exp_filename);
+<a name='L1399'>        @unlink($output_filename);
+<a name='L1400'>        @unlink($memcheck_filename);
+<a name='L1401'>        @unlink($temp_file);
+<a name='L1402'>        @unlink($test_file);
+<a name='L1403'>        @unlink($temp_skipif);
+<a name='L1404'>        @unlink($test_skipif);
+<a name='L1405'>        @unlink($tmp_post);
+<a name='L1406'>        @unlink($temp_clean);
+<a name='L1407'>        @unlink($test_clean);
+<a name='L1408'>
+<a name='L1409'>        <i><font color='green'>// Reset environment from any previous test.</font></i>
+<a name='L1410'>        $env['REDIRECT_STATUS'] = '';
+<a name='L1411'>        $env['QUERY_STRING']    = '';
+<a name='L1412'>        $env['PATH_TRANSLATED'] = '';
+<a name='L1413'>        $env['SCRIPT_FILENAME'] = '';
+<a name='L1414'>        $env['REQUEST_METHOD']  = '';
+<a name='L1415'>        $env['CONTENT_TYPE']    = '';
+<a name='L1416'>        $env['CONTENT_LENGTH']  = '';
+<a name='L1417'>        $env['TZ']              = '';
+<a name='L1418'>
+<a name='L1419'>        <b>if</b> (!<b>empty</b>($section_text['ENV'])) <font color='red'>{</font>
+<a name='L1420'>
+<a name='L1421'>                <b>foreach</b>(explode("\n", trim($section_text['ENV'])) <b>as</b> $e) <font color='red'>{</font>
+<a name='L1422'>                        $e = explode('=', trim($e), 2);
+<a name='L1423'>
+<a name='L1424'>                        <b>if</b> (!<b>empty</b>($e[0]) &amp;&amp; isset($e[1])) <font color='red'>{</font>
+<a name='L1425'>                                $env[$e[0]] = $e[1];
+<a name='L1426'>                        <font color='red'>}</font>
+<a name='L1427'>                <font color='red'>}</font>
+<a name='L1428'>        <font color='red'>}</font>
+<a name='L1429'>
+<a name='L1430'>        <i><font color='green'>// Default ini settings</font></i>
+<a name='L1431'>        $ini_settings = <b>array</b>();
+<a name='L1432'>        <i><font color='green'>// additional ini overwrites</font></i>
+<a name='L1433'>        <i><font color='green'>//$ini_overwrites[] = 'setting=value';</font></i>
+<a name='L1434'>        <a href='../S/44.html#L2128' title='Defined at 2128 in run-tests.php.'>settings2array</a>($ini_overwrites, $ini_settings);
+<a name='L1435'>
+<a name='L1436'>        <i><font color='green'>// Any special ini settings</font></i>
+<a name='L1437'>        <i><font color='green'>// these may overwrite the test defaults...</font></i>
+<a name='L1438'>        <b>if</b> (array_key_exists('INI', $section_text)) <font color='red'>{</font>
+<a name='L1439'>                <b>if</b> (strpos($section_text['INI'], '{PWD}') !== <b>false</b>) <font color='red'>{</font>
+<a name='L1440'>                        $section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+<a name='L1441'>                <font color='red'>}</font>
+<a name='L1442'>                <a href='../S/44.html#L2128' title='Defined at 2128 in run-tests.php.'>settings2array</a>(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
+<a name='L1443'>        <font color='red'>}</font>
+<a name='L1444'>
+<a name='L1445'>        <a href='../S/44.html#L2152' title='Defined at 2152 in run-tests.php.'>settings2params</a>($ini_settings);
+<a name='L1446'>
+<a name='L1447'>        <i><font color='green'>// Check if test should be skipped.</font></i>
+<a name='L1448'>        $info = '';
+<a name='L1449'>        $warn = <b>false</b>;
+<a name='L1450'>
+<a name='L1451'>        <b>if</b> (array_key_exists('SKIPIF', $section_text)) <font color='red'>{</font>
+<a name='L1452'>
+<a name='L1453'>                <b>if</b> (trim($section_text['SKIPIF'])) <font color='red'>{</font>
+<a name='L1454'>                        <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('skip', $section_text['SKIPIF']);
+<a name='L1455'>                        <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($test_skipif, $section_text['SKIPIF'], $temp_skipif);
+<a name='L1456'>                        $extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+<a name='L1457'>                                "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
+<a name='L1458'>
+<a name='L1459'>                        <b>if</b> ($leak_check) <font color='red'>{</font>
+<a name='L1460'>                                $env['USE_ZEND_ALLOC'] = '0';
+<a name='L1461'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1462'>                                $env['USE_ZEND_ALLOC'] = '1';
+<a name='L1463'>                        <font color='red'>}</font>
+<a name='L1464'>
+<a name='L1465'>                        $output = <a href='../S/44.html#L1029' title='Defined at 1029 in run-tests.php.'>system_with_timeout</a>("$extra $php $pass_options -q $ini_settings -d display_errors=0 $test_skipif", $env);
+<a name='L1466'>
+<a name='L1467'>                        <b>if</b> (!$cfg['keep']['skip']) <font color='red'>{</font>
+<a name='L1468'>                                @unlink($test_skipif);
+<a name='L1469'>                        <font color='red'>}</font>
+<a name='L1470'>
+<a name='L1471'>                        <b>if</b> (!strncasecmp('skip', ltrim($output), 4)) <font color='red'>{</font>
+<a name='L1472'>
+<a name='L1473'>                                <b>if</b> (preg_match('/^\s*skip\s*(.+)\s*/i', $output, $m)) <font color='red'>{</font>
+<a name='L1474'>                                        <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
+<a name='L1475'>                                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1476'>                                        <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>('SKIP', $tested, $tested_file, '', $temp_filenames);
+<a name='L1477'>                                <font color='red'>}</font>
+<a name='L1478'>
+<a name='L1479'>                                <b>if</b> (isset($old_php)) <font color='red'>{</font>
+<a name='L1480'>                                        $php = $old_php;
+<a name='L1481'>                                <font color='red'>}</font>
+<a name='L1482'>
+<a name='L1483'>                                <b>if</b> (!$cfg['keep']['skip']) <font color='red'>{</font>
+<a name='L1484'>                                        @unlink($test_skipif);
+<a name='L1485'>                                <font color='red'>}</font>
+<a name='L1486'>
+<a name='L1487'>                                <b>return</b> 'SKIPPED';
+<a name='L1488'>                        <font color='red'>}</font>
+<a name='L1489'>
+<a name='L1490'>                        <b>if</b> (!strncasecmp('info', ltrim($output), 4)) <font color='red'>{</font>
+<a name='L1491'>                                <b>if</b> (preg_match('/^\s*info\s*(.+)\s*/i', $output, $m)) <font color='red'>{</font>
+<a name='L1492'>                                        $info = " (info: $m[1])";
+<a name='L1493'>                                <font color='red'>}</font>
+<a name='L1494'>                        <font color='red'>}</font>
+<a name='L1495'>
+<a name='L1496'>                        <b>if</b> (!strncasecmp('warn', ltrim($output), 4)) <font color='red'>{</font>
+<a name='L1497'>                                <b>if</b> (preg_match('/^\s*warn\s*(.+)\s*/i', $output, $m)) <font color='red'>{</font>
+<a name='L1498'>                                        $warn = <b>true</b>; <i><font color='green'>/* only if there is a reason */</font></i>
+<a name='L1499'>                                        $info = " (warn: $m[1])";
+<a name='L1500'>                                <font color='red'>}</font>
+<a name='L1501'>                        <font color='red'>}</font>
+<a name='L1502'>                <font color='red'>}</font>
+<a name='L1503'>        <font color='red'>}</font>
+<a name='L1504'>
+<a name='L1505'>        <b>if</b> (@count($section_text['REDIRECTTEST']) == 1) <font color='red'>{</font>
+<a name='L1506'>                $test_files = <b>array</b>();
+<a name='L1507'>
+<a name='L1508'>                $IN_REDIRECT = <b>eval</b>($section_text['REDIRECTTEST']);
+<a name='L1509'>                $IN_REDIRECT['via'] = "via [$shortname]\n\t";
+<a name='L1510'>                $IN_REDIRECT['dir'] = realpath(dirname($file));
+<a name='L1511'>                $IN_REDIRECT['prefix'] = trim($section_text['TEST']);
+<a name='L1512'>
+<a name='L1513'>                <b>if</b> (count($IN_REDIRECT['TESTS']) == 1) <font color='red'>{</font>
+<a name='L1514'>
+<a name='L1515'>                        <b>if</b> (<b>is_array</b>($org_file)) <font color='red'>{</font>
+<a name='L1516'>                                $test_files[] = $org_file[1];
+<a name='L1517'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1518'>                                $GLOBALS['test_files'] = $test_files;
+<a name='L1519'>                                <a href='../S/44.html#L846' title='Defined at 846 in run-tests.php.'>find_files</a>($IN_REDIRECT['TESTS']);
+<a name='L1520'>
+<a name='L1521'>                                <b>foreach</b>($GLOBALS['test_files'] <b>as</b> $f) <font color='red'>{</font>
+<a name='L1522'>                                        $test_files[] = <b>array</b>($f, $file);
+<a name='L1523'>                                <font color='red'>}</font>
+<a name='L1524'>                        <font color='red'>}</font>
+<a name='L1525'>                        $test_cnt += @count($test_files) - 1;
+<a name='L1526'>                        $test_idx--;
+<a name='L1527'>
+<a name='L1528'>                        <a href='../S/44.html#L2368' title='Defined at 2368 in run-tests.php.'>show_redirect_start</a>($IN_REDIRECT['TESTS'], $tested, $tested_file);
+<a name='L1529'>
+<a name='L1530'>                        <i><font color='green'>// set up environment</font></i>
+<a name='L1531'>                        $redirenv = array_merge($environment, $IN_REDIRECT['ENV']);
+<a name='L1532'>                        $redirenv['REDIR_TEST_DIR'] = realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR;
+<a name='L1533'>
+<a name='L1534'>                        usort($test_files, "test_sort");
+<a name='L1535'>                        <a href='../S/44.html#L1092' title='Defined at 1092 in run-tests.php.'>run_all_tests</a>($test_files, $redirenv, $tested);
+<a name='L1536'>
+<a name='L1537'>                        <a href='../S/44.html#L2379' title='Defined at 2379 in run-tests.php.'>show_redirect_ends</a>($IN_REDIRECT['TESTS'], $tested, $tested_file);
+<a name='L1538'>
+<a name='L1539'>                        <i><font color='green'>// a redirected test never fails</font></i>
+<a name='L1540'>                        $IN_REDIRECT = <b>false</b>;
+<a name='L1541'>                        <b>return</b> 'REDIR';
+<a name='L1542'>
+<a name='L1543'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1544'>
+<a name='L1545'>                        $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
+<a name='L1546'>                        <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>("BORK", $bork_info, '', $temp_filenames);
+<a name='L1547'>                        $PHP_FAILED_TESTS['BORKED'][] = <b>array</b> (
+<a name='L1548'>                                                                        'name' =&gt; $file,
+<a name='L1549'>                                                                        'test_name' =&gt; '',
+<a name='L1550'>                                                                        'output' =&gt; '',
+<a name='L1551'>                                                                        'diff'   =&gt; '',
+<a name='L1552'>                                                                        'info'   =&gt; "$bork_info [$file]",
+<a name='L1553'>                        );
+<a name='L1554'>                <font color='red'>}</font>
+<a name='L1555'>        <font color='red'>}</font>
+<a name='L1556'>
+<a name='L1557'>        <b>if</b> (<b>is_array</b>($org_file) || @count($section_text['REDIRECTTEST']) == 1) <font color='red'>{</font>
+<a name='L1558'>
+<a name='L1559'>                <b>if</b> (<b>is_array</b>($org_file)) <font color='red'>{</font>
+<a name='L1560'>                        $file = $org_file[0];
+<a name='L1561'>                <font color='red'>}</font>
+<a name='L1562'>
+<a name='L1563'>                $bork_info = "Redirected test did not contain redirection info";
+<a name='L1564'>                <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>("BORK", $bork_info, '', $temp_filenames);
+<a name='L1565'>                $PHP_FAILED_TESTS['BORKED'][] = <b>array</b> (
+<a name='L1566'>                                                                'name' =&gt; $file,
+<a name='L1567'>                                                                'test_name' =&gt; '',
+<a name='L1568'>                                                                'output' =&gt; '',
+<a name='L1569'>                                                                'diff'   =&gt; '',
+<a name='L1570'>                                                                'info'   =&gt; "$bork_info [$file]",
+<a name='L1571'>                );
+<a name='L1572'>                <b>return</b> 'BORKED';
+<a name='L1573'>        <font color='red'>}</font>
+<a name='L1574'>
+<a name='L1575'>        <i><font color='green'>// We've satisfied the preconditions - run the test!</font></i>
+<a name='L1576'>        <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('php', $section_text['FILE'], 'TEST');
+<a name='L1577'>        <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($test_file, $section_text['FILE'], $temp_file);
+<a name='L1578'>
+<a name='L1579'>        <b>if</b> (array_key_exists('GET', $section_text)) <font color='red'>{</font>
+<a name='L1580'>                $query_string = trim($section_text['GET']);
+<a name='L1581'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1582'>                $query_string = '';
+<a name='L1583'>        <font color='red'>}</font>
+<a name='L1584'>
+<a name='L1585'>        $env['REDIRECT_STATUS'] = '1';
+<a name='L1586'>        $env['QUERY_STRING']    = $query_string;
+<a name='L1587'>        $env['PATH_TRANSLATED'] = $test_file;
+<a name='L1588'>        $env['SCRIPT_FILENAME'] = $test_file;
+<a name='L1589'>
+<a name='L1590'>        <b>if</b> (array_key_exists('COOKIE', $section_text)) <font color='red'>{</font>
+<a name='L1591'>                $env['HTTP_COOKIE'] = trim($section_text['COOKIE']);
+<a name='L1592'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1593'>                $env['HTTP_COOKIE'] = '';
+<a name='L1594'>        <font color='red'>}</font>
+<a name='L1595'>
+<a name='L1596'>        $args = isset($section_text['ARGS']) ? ' -- ' . $section_text['ARGS'] : '';
+<a name='L1597'>
+<a name='L1598'>        <b>if</b> (array_key_exists('POST_RAW', $section_text) &amp;&amp; !<b>empty</b>($section_text['POST_RAW'])) <font color='red'>{</font>
+<a name='L1599'>
+<a name='L1600'>                $post = trim($section_text['POST_RAW']);
+<a name='L1601'>                $raw_lines = explode("\n", $post);
+<a name='L1602'>
+<a name='L1603'>                $request = '';
+<a name='L1604'>                $started = <b>false</b>;
+<a name='L1605'>
+<a name='L1606'>                <b>foreach</b> ($raw_lines <b>as</b> $line) <font color='red'>{</font>
+<a name='L1607'>
+<a name='L1608'>                        <b>if</b> (<b>empty</b>($env['CONTENT_TYPE']) &amp;&amp; preg_match('/^Content-Type:(.*)/i', $line, $res)) <font color='red'>{</font>
+<a name='L1609'>                                $env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[1]));
+<a name='L1610'>                                <b>continue</b>;
+<a name='L1611'>                        <font color='red'>}</font>
+<a name='L1612'>
+<a name='L1613'>                        <b>if</b> ($started) <font color='red'>{</font>
+<a name='L1614'>                                $request .= "\n";
+<a name='L1615'>                        <font color='red'>}</font>
+<a name='L1616'>
+<a name='L1617'>                        $started = <b>true</b>;
+<a name='L1618'>                        $request .= $line;
+<a name='L1619'>                <font color='red'>}</font>
+<a name='L1620'>
+<a name='L1621'>                $env['CONTENT_LENGTH'] = strlen($request);
+<a name='L1622'>                $env['REQUEST_METHOD'] = 'POST';
+<a name='L1623'>
+<a name='L1624'>                <b>if</b> (<b>empty</b>($request)) <font color='red'>{</font>
+<a name='L1625'>                        <b>return</b> 'BORKED';
+<a name='L1626'>                <font color='red'>}</font>
+<a name='L1627'>
+<a name='L1628'>                <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($tmp_post, $request);
+<a name='L1629'>                $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2&gt;&amp;1 &lt; $tmp_post";
+<a name='L1630'>
+<a name='L1631'>        <font color='red'>}</font> <b>else</b> <b>if</b> (array_key_exists('POST', $section_text) &amp;&amp; !<b>empty</b>($section_text['POST'])) <font color='red'>{</font>
+<a name='L1632'>
+<a name='L1633'>                $post = trim($section_text['POST']);
+<a name='L1634'>
+<a name='L1635'>                <b>if</b> (array_key_exists('GZIP_POST', $section_text) &amp;&amp; function_exists('gzencode')) <font color='red'>{</font>
+<a name='L1636'>                        $post = gzencode($post, 9, FORCE_GZIP);
+<a name='L1637'>                        $env['HTTP_CONTENT_ENCODING'] = 'gzip';
+<a name='L1638'>                <font color='red'>}</font> <b>else</b> <b>if</b> (array_key_exists('DEFLATE_POST', $section_text) &amp;&amp; function_exists('gzcompress')) <font color='red'>{</font>
+<a name='L1639'>                        $post = gzcompress($post, 9);
+<a name='L1640'>                        $env['HTTP_CONTENT_ENCODING'] = 'deflate';
+<a name='L1641'>                <font color='red'>}</font>
+<a name='L1642'>
+<a name='L1643'>                <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($tmp_post, $post);
+<a name='L1644'>                $content_length = strlen($post);
+<a name='L1645'>
+<a name='L1646'>                $env['REQUEST_METHOD'] = 'POST';
+<a name='L1647'>                $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+<a name='L1648'>                $env['CONTENT_LENGTH'] = $content_length;
+<a name='L1649'>
+<a name='L1650'>                $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2&gt;&amp;1 &lt; $tmp_post";
+<a name='L1651'>
+<a name='L1652'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1653'>
+<a name='L1654'>                $env['REQUEST_METHOD'] = 'GET';
+<a name='L1655'>                $env['CONTENT_TYPE']   = '';
+<a name='L1656'>                $env['CONTENT_LENGTH'] = '';
+<a name='L1657'>
+<a name='L1658'>                $cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args 2&gt;&amp;1";
+<a name='L1659'>        <font color='red'>}</font>
+<a name='L1660'>
+<a name='L1661'>        <b>if</b> ($leak_check) <font color='red'>{</font>
+<a name='L1662'>                $env['USE_ZEND_ALLOC'] = '0';
+<a name='L1663'>
+<a name='L1664'>                <b>if</b> ($valgrind_version &gt;= 330) <font color='red'>{</font>
+<a name='L1665'>                        <i><font color='green'>/* valgrind 3.3.0+ doesn't have --log-file-exactly option */</font></i>
+<a name='L1666'>                        $cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
+<a name='L1667'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1668'>                        $cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+<a name='L1669'>                <font color='red'>}</font>
+<a name='L1670'>
+<a name='L1671'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1672'>                $env['USE_ZEND_ALLOC'] = '1';
+<a name='L1673'>        <font color='red'>}</font>
+<a name='L1674'>
+<a name='L1675'>        <b>if</b> ($DETAILED) <b>echo</b> "
+<a name='L1676'>CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
+<a name='L1677'>CONTENT_TYPE    = " . $env['CONTENT_TYPE'] . "
+<a name='L1678'>PATH_TRANSLATED = " . $env['PATH_TRANSLATED'] . "
+<a name='L1679'>QUERY_STRING    = " . $env['QUERY_STRING'] . "
+<a name='L1680'>REDIRECT_STATUS = " . $env['REDIRECT_STATUS'] . "
+<a name='L1681'>REQUEST_METHOD  = " . $env['REQUEST_METHOD'] . "
+<a name='L1682'>SCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . "
+<a name='L1683'>HTTP_COOKIE     = " . $env['HTTP_COOKIE'] . "
+<a name='L1684'>COMMAND $cmd
+<a name='L1685'>";
+<a name='L1686'>
+<a name='L1687'>        $out = (binary) <a href='../S/44.html#L1029' title='Defined at 1029 in run-tests.php.'>system_with_timeout</a>($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null);
+<a name='L1688'>
+<a name='L1689'>        <b>if</b> (array_key_exists('CLEAN', $section_text) &amp;&amp; (!$no_clean || $cfg['keep']['clean'])) <font color='red'>{</font>
+<a name='L1690'>
+<a name='L1691'>                <b>if</b> (trim($section_text['CLEAN'])) <font color='red'>{</font>
+<a name='L1692'>                        <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('clean', $section_text['CLEAN']);
+<a name='L1693'>                        <a href='../S/44.html#L987' title='Defined at 987 in run-tests.php.'>save_text</a>($test_clean, trim($section_text['CLEAN']), $temp_clean);
+<a name='L1694'>
+<a name='L1695'>                        <b>if</b> (!$no_clean) <font color='red'>{</font>
+<a name='L1696'>                                $clean_params = <b>array</b>();
+<a name='L1697'>                                <a href='../S/44.html#L2128' title='Defined at 2128 in run-tests.php.'>settings2array</a>($ini_overwrites, $clean_params);
+<a name='L1698'>                                <a href='../S/44.html#L2152' title='Defined at 2152 in run-tests.php.'>settings2params</a>($clean_params);
+<a name='L1699'>                                $extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+<a name='L1700'>                                        "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
+<a name='L1701'>                                <a href='../S/44.html#L1029' title='Defined at 1029 in run-tests.php.'>system_with_timeout</a>("$extra $php $pass_options -q $clean_params $test_clean", $env);
+<a name='L1702'>                        <font color='red'>}</font>
+<a name='L1703'>
+<a name='L1704'>                        <b>if</b> (!$cfg['keep']['clean']) <font color='red'>{</font>
+<a name='L1705'>                                @unlink($test_clean);
+<a name='L1706'>                        <font color='red'>}</font>
+<a name='L1707'>                <font color='red'>}</font>
+<a name='L1708'>        <font color='red'>}</font>
+<a name='L1709'>
+<a name='L1710'>        @unlink($tmp_post);
+<a name='L1711'>
+<a name='L1712'>        $leaked = <b>false</b>;
+<a name='L1713'>        $passed = <b>false</b>;
+<a name='L1714'>
+<a name='L1715'>        <b>if</b> ($leak_check) <font color='red'>{</font> <i><font color='green'>// leak check</font></i>
+<a name='L1716'>                $leaked = filesize($memcheck_filename) &gt; 0;
+<a name='L1717'>
+<a name='L1718'>                <b>if</b> (!$leaked) <font color='red'>{</font>
+<a name='L1719'>                        @unlink($memcheck_filename);
+<a name='L1720'>                <font color='red'>}</font>
+<a name='L1721'>        <font color='red'>}</font>
+<a name='L1722'>
+<a name='L1723'>        <i><font color='green'>// Does the output match what is expected?</font></i>
+<a name='L1724'>        $output = preg_replace(b"/\r\n/", b"\n", trim($out));
+<a name='L1725'>
+<a name='L1726'>        <i><font color='green'>/* when using CGI, strip the headers from the output */</font></i>
+<a name='L1727'>        $headers = b"";
+<a name='L1728'>
+<a name='L1729'>        <b>if</b> (isset($old_php) &amp;&amp; preg_match(b"/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) <font color='red'>{</font>
+<a name='L1730'>                $output = trim($match[2]);
+<a name='L1731'>                $rh = preg_split(b"/[\n\r]+/", $match[1]);
+<a name='L1732'>                $headers = <b>array</b>();
+<a name='L1733'>
+<a name='L1734'>                <b>foreach</b> ($rh <b>as</b> $line) <font color='red'>{</font>
+<a name='L1735'>                        <b>if</b> (strpos($line, b':') !== <b>false</b>) <font color='red'>{</font>
+<a name='L1736'>                                $line = explode(b':', $line, 2);
+<a name='L1737'>                                $headers[trim($line[0])] = trim($line[1]);
+<a name='L1738'>                        <font color='red'>}</font>
+<a name='L1739'>                <font color='red'>}</font>
+<a name='L1740'>        <font color='red'>}</font>
+<a name='L1741'>
+<a name='L1742'>        $failed_headers = <b>false</b>;
+<a name='L1743'>
+<a name='L1744'>        <b>if</b> (isset($section_text['EXPECTHEADERS'])) <font color='red'>{</font>
+<a name='L1745'>                $want = <b>array</b>();
+<a name='L1746'>                $wanted_headers = <b>array</b>();
+<a name='L1747'>                $lines = preg_split(b"/[\n\r]+/", (binary) $section_text['EXPECTHEADERS']);
+<a name='L1748'>
+<a name='L1749'>                <b>foreach</b>($lines <b>as</b> $line) <font color='red'>{</font>
+<a name='L1750'>                        <b>if</b> (strpos($line, b':') !== <b>false</b>) <font color='red'>{</font>
+<a name='L1751'>                                $line = explode(b':', $line, 2);
+<a name='L1752'>                                $want[trim($line[0])] = trim($line[1]);
+<a name='L1753'>                                $wanted_headers[] = trim($line[0]) . b': ' . trim($line[1]);
+<a name='L1754'>                        <font color='red'>}</font>
+<a name='L1755'>                <font color='red'>}</font>
+<a name='L1756'>
+<a name='L1757'>                $org_headers = $headers;
+<a name='L1758'>                $headers = <b>array</b>();
+<a name='L1759'>                $output_headers = <b>array</b>();
+<a name='L1760'>
+<a name='L1761'>                <b>foreach</b>($want <b>as</b> $k =&gt; $v) <font color='red'>{</font>
+<a name='L1762'>
+<a name='L1763'>                        <b>if</b> (isset($org_headers[$k])) <font color='red'>{</font>
+<a name='L1764'>                                $headers = $org_headers[$k];
+<a name='L1765'>                                $output_headers[] = $k . b': ' . $org_headers[$k];
+<a name='L1766'>                        <font color='red'>}</font>
+<a name='L1767'>
+<a name='L1768'>                        <b>if</b> (!isset($org_headers[$k]) || $org_headers[$k] != $v) <font color='red'>{</font>
+<a name='L1769'>                                $failed_headers = <b>true</b>;
+<a name='L1770'>                        <font color='red'>}</font>
+<a name='L1771'>                <font color='red'>}</font>
+<a name='L1772'>
+<a name='L1773'>                ksort($wanted_headers);
+<a name='L1774'>                $wanted_headers = join(b"\n", $wanted_headers);
+<a name='L1775'>                ksort($output_headers);
+<a name='L1776'>                $output_headers = join(b"\n", $output_headers);
+<a name='L1777'>        <font color='red'>}</font>
+<a name='L1778'>
+<a name='L1779'>        <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('out', $output);
+<a name='L1780'>
+<a name='L1781'>        <b>if</b> (isset($section_text['EXPECTF']) || isset($section_text['EXPECTREGEX'])) <font color='red'>{</font>
+<a name='L1782'>
+<a name='L1783'>                <b>if</b> (isset($section_text['EXPECTF'])) <font color='red'>{</font>
+<a name='L1784'>                        $wanted = trim($section_text['EXPECTF']);
+<a name='L1785'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1786'>                        $wanted = trim($section_text['EXPECTREGEX']);
+<a name='L1787'>                <font color='red'>}</font>
+<a name='L1788'>
+<a name='L1789'>                <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('exp', $wanted);
+<a name='L1790'>                $wanted_re = preg_replace(b'/\r\n/', b"\n", $wanted);
+<a name='L1791'>
+<a name='L1792'>                <b>if</b> (isset($section_text['EXPECTF'])) <font color='red'>{</font>
+<a name='L1793'>
+<a name='L1794'>                        <i><font color='green'>// do preg_quote, but miss out any %r delimited sections</font></i>
+<a name='L1795'>                        $temp = b"";
+<a name='L1796'>                        $r = b"%r";
+<a name='L1797'>                        $startOffset = 0;
+<a name='L1798'>                        $length = strlen($wanted_re);
+<a name='L1799'>                        <b>while</b>($startOffset &lt; $length) <font color='red'>{</font>
+<a name='L1800'>                                $start = strpos($wanted_re, $r, $startOffset);
+<a name='L1801'>                                <b>if</b> ($start !== <b>false</b>) <font color='red'>{</font>
+<a name='L1802'>                                        <i><font color='green'>// we have found a start tag</font></i>
+<a name='L1803'>                                        $end = strpos($wanted_re, $r, $start+2);
+<a name='L1804'>                                        <b>if</b> ($end === <b>false</b>) <font color='red'>{</font>
+<a name='L1805'>                                                <i><font color='green'>// unbalanced tag, ignore it.</font></i>
+<a name='L1806'>                                                $end = $start = $length;
+<a name='L1807'>                                        <font color='red'>}</font>
+<a name='L1808'>                                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1809'>                                        <i><font color='green'>// no more %r sections</font></i>
+<a name='L1810'>                                        $start = $end = $length;
+<a name='L1811'>                                <font color='red'>}</font>
+<a name='L1812'>                                <i><font color='green'>// quote a non re portion of the string</font></i>
+<a name='L1813'>                                $temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  b'/');
+<a name='L1814'>                                <i><font color='green'>// add the re unquoted.</font></i>
+<a name='L1815'>                                <b>if</b> ($end &gt; $start) <font color='red'>{</font>
+<a name='L1816'>                                        $temp = $temp . b'(' . substr($wanted_re, $start+2, ($end - $start-2)). b')';
+<a name='L1817'>                                <font color='red'>}</font>
+<a name='L1818'>                                $startOffset = $end + 2;
+<a name='L1819'>                        <font color='red'>}</font>
+<a name='L1820'>                        $wanted_re = $temp;
+<a name='L1821'>                
+<a name='L1822'>                        $wanted_re = str_replace(
+<a name='L1823'>                                <b>array</b>(b'%binary_string_optional%'),
+<a name='L1824'>                                version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'binary string',
+<a name='L1825'>                                $wanted_re
+<a name='L1826'>                        );
+<a name='L1827'>                        $wanted_re = str_replace(
+<a name='L1828'>                                <b>array</b>(b'%unicode_string_optional%'),
+<a name='L1829'>                                version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'Unicode string',
+<a name='L1830'>                                $wanted_re
+<a name='L1831'>                        );
+<a name='L1832'>                        $wanted_re = str_replace(
+<a name='L1833'>                                <b>array</b>(b'%unicode\|string%', b'%string\|unicode%'),
+<a name='L1834'>                                version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'unicode',
+<a name='L1835'>                                $wanted_re
+<a name='L1836'>                        );
+<a name='L1837'>                        $wanted_re = str_replace(
+<a name='L1838'>                                <b>array</b>(b'%u\|b%', b'%b\|u%'),
+<a name='L1839'>                                version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'' : b'u',
+<a name='L1840'>                                $wanted_re
+<a name='L1841'>                        );
+<a name='L1842'>                        <i><font color='green'>// Stick to basics</font></i>
+<a name='L1843'>                        $wanted_re = str_replace(b'%e', b'\\' . DIRECTORY_SEPARATOR, $wanted_re);
+<a name='L1844'>                        $wanted_re = str_replace(b'%s', b'[^\r\n]+', $wanted_re);
+<a name='L1845'>                        $wanted_re = str_replace(b'%S', b'[^\r\n]*', $wanted_re);
+<a name='L1846'>                        $wanted_re = str_replace(b'%a', b'.+', $wanted_re);
+<a name='L1847'>                        $wanted_re = str_replace(b'%A', b'.*', $wanted_re);
+<a name='L1848'>                        $wanted_re = str_replace(b'%w', b'\s*', $wanted_re);
+<a name='L1849'>                        $wanted_re = str_replace(b'%i', b'[+-]?\d+', $wanted_re);
+<a name='L1850'>                        $wanted_re = str_replace(b'%d', b'\d+', $wanted_re);
+<a name='L1851'>                        $wanted_re = str_replace(b'%x', b'[0-9a-fA-F]+', $wanted_re);
+<a name='L1852'>                        $wanted_re = str_replace(b'%f', b'[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
+<a name='L1853'>                        $wanted_re = str_replace(b'%c', b'.', $wanted_re);
+<a name='L1854'>                        <i><font color='green'>// %f allows two points "-.0.0" but that is the best *simple* expression</font></i>
+<a name='L1855'>                <font color='red'>}</font>
+<a name='L1856'><i><font color='green'>/* DEBUG YOUR REGEX HERE</font></i>
+<a name='L1857'><i><font color='green'>                var_dump($wanted_re);</font></i>
+<a name='L1858'><i><font color='green'>                print(str_repeat('=', 80) . "\n");</font></i>
+<a name='L1859'><i><font color='green'>                var_dump($output);</font></i>
+<a name='L1860'><i><font color='green'>*/</font></i>
+<a name='L1861'>                <b>if</b> (preg_match(b"/^$wanted_re\$/s", $output)) <font color='red'>{</font>
+<a name='L1862'>                        $passed = <b>true</b>;
+<a name='L1863'>                        <b>if</b> (!$cfg['keep']['php']) <font color='red'>{</font>
+<a name='L1864'>                                @unlink($test_file);
+<a name='L1865'>                        <font color='red'>}</font>
+<a name='L1866'>                        <b>if</b> (isset($old_php)) <font color='red'>{</font>
+<a name='L1867'>                                $php = $old_php;
+<a name='L1868'>                        <font color='red'>}</font>
+<a name='L1869'>
+<a name='L1870'>                        <b>if</b> (!$leaked &amp;&amp; !$failed_headers) <font color='red'>{</font>
+<a name='L1871'>                                <b>if</b> (isset($section_text['XFAIL'] )) <font color='red'>{</font>
+<a name='L1872'>                                        $warn = <b>true</b>;
+<a name='L1873'>                                        $info = " (warn: XFAIL section but test passes)";
+<a name='L1874'>                                <font color='red'>}</font><b>else</b> <font color='red'>{</font>
+<a name='L1875'>                                        <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>("PASS", $tested, $tested_file, '', $temp_filenames);
+<a name='L1876'>                                        <b>return</b> 'PASSED';
+<a name='L1877'>                                <font color='red'>}</font>
+<a name='L1878'>                        <font color='red'>}</font>
+<a name='L1879'>                <font color='red'>}</font>
+<a name='L1880'>
+<a name='L1881'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1882'>
+<a name='L1883'>                $wanted = (binary) trim($section_text['EXPECT']);
+<a name='L1884'>                $wanted = preg_replace(b'/\r\n/',b"\n", $wanted);
+<a name='L1885'>                <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('exp', $wanted);
+<a name='L1886'>
+<a name='L1887'>                <i><font color='green'>// compare and leave on success</font></i>
+<a name='L1888'>                <b>if</b> (!strcmp($output, $wanted)) <font color='red'>{</font>
+<a name='L1889'>                        $passed = <b>true</b>;
+<a name='L1890'>
+<a name='L1891'>                        <b>if</b> (!$cfg['keep']['php']) <font color='red'>{</font>
+<a name='L1892'>                                @unlink($test_file);
+<a name='L1893'>                        <font color='red'>}</font>
+<a name='L1894'>
+<a name='L1895'>                        <b>if</b> (isset($old_php)) <font color='red'>{</font>
+<a name='L1896'>                                $php = $old_php;
+<a name='L1897'>                        <font color='red'>}</font>
+<a name='L1898'>
+<a name='L1899'>                        <b>if</b> (!$leaked &amp;&amp; !$failed_headers) <font color='red'>{</font>
+<a name='L1900'>                                <b>if</b> (isset($section_text['XFAIL'] )) <font color='red'>{</font>
+<a name='L1901'>                                        $warn = <b>true</b>;
+<a name='L1902'>                                        $info = " (warn: XFAIL section but test passes)";
+<a name='L1903'>                                <font color='red'>}</font><b>else</b> <font color='red'>{</font>
+<a name='L1904'>                                        <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>("PASS", $tested, $tested_file, '', $temp_filenames);
+<a name='L1905'>                                        <b>return</b> 'PASSED';
+<a name='L1906'>                                <font color='red'>}</font>
+<a name='L1907'>                        <font color='red'>}</font>
+<a name='L1908'>                <font color='red'>}</font>
+<a name='L1909'>
+<a name='L1910'>                $wanted_re = null;
+<a name='L1911'>        <font color='red'>}</font>
+<a name='L1912'>
+<a name='L1913'>        <i><font color='green'>// Test failed so we need to report details.</font></i>
+<a name='L1914'>        <b>if</b> ($failed_headers) <font color='red'>{</font>
+<a name='L1915'>                $passed = <b>false</b>;
+<a name='L1916'>                $wanted = (binary) $wanted_headers . b"\n--HEADERS--\n" . (binary) $wanted;
+<a name='L1917'>                $output = (binary) $output_headers . b"\n--HEADERS--\n" . (binary) $output;
+<a name='L1918'>
+<a name='L1919'>                <b>if</b> (isset($wanted_re)) <font color='red'>{</font>
+<a name='L1920'>                        $wanted_re = preg_quote($wanted_headers . "\n--HEADERS--\n", '/') . $wanted_re;
+<a name='L1921'>                <font color='red'>}</font>
+<a name='L1922'>        <font color='red'>}</font>
+<a name='L1923'>
+<a name='L1924'>        <b>if</b> ($leaked) <font color='red'>{</font>
+<a name='L1925'>                $restype[] = 'LEAK';
+<a name='L1926'>        <font color='red'>}</font>
+<a name='L1927'>
+<a name='L1928'>        <b>if</b> ($warn) <font color='red'>{</font>
+<a name='L1929'>                $restype[] = 'WARN';
+<a name='L1930'>        <font color='red'>}</font>
+<a name='L1931'>
+<a name='L1932'>        <b>if</b> (!$passed) <font color='red'>{</font>
+<a name='L1933'>                <b>if</b> (isset($section_text['XFAIL'])) <font color='red'>{</font>
+<a name='L1934'>                        $restype[] = 'XFAIL';
+<a name='L1935'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1936'>                        $restype[] = 'FAIL';
+<a name='L1937'>                <font color='red'>}</font>
+<a name='L1938'>        <font color='red'>}</font>
+<a name='L1939'>
+<a name='L1940'>        <b>if</b> (!$passed) <font color='red'>{</font>
+<a name='L1941'>
+<a name='L1942'>                <i><font color='green'>// write .exp</font></i>
+<a name='L1943'>                <b>if</b> (strpos($log_format, 'E') !== <b>false</b> &amp;&amp; file_put_contents($exp_filename, (binary) $wanted, <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>) === <b>false</b>) <font color='red'>{</font>
+<a name='L1944'>                        <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot create expected test output - $exp_filename");
+<a name='L1945'>                <font color='red'>}</font>
+<a name='L1946'>
+<a name='L1947'>                <i><font color='green'>// write .out</font></i>
+<a name='L1948'>                <b>if</b> (strpos($log_format, 'O') !== <b>false</b> &amp;&amp; file_put_contents($output_filename, (binary) $output, <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>) === <b>false</b>) <font color='red'>{</font>
+<a name='L1949'>                        <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot create test output - $output_filename");
+<a name='L1950'>                <font color='red'>}</font>
+<a name='L1951'>
+<a name='L1952'>                <i><font color='green'>// write .diff</font></i>
+<a name='L1953'>                $diff = <a href='../S/44.html#L2112' title='Defined at 2112 in run-tests.php.'>generate_diff</a>($wanted, $wanted_re, $output);
+<a name='L1954'>                <b>if</b> (<b>is_array</b>($IN_REDIRECT)) <font color='red'>{</font>
+<a name='L1955'>                        $diff = "# original source file: $shortname\n" . $diff;
+<a name='L1956'>                <font color='red'>}</font>
+<a name='L1957'>                <a href='../S/44.html#L1124' title='Defined at 1124 in run-tests.php.'>show_file_block</a>('diff', $diff);
+<a name='L1958'>                <b>if</b> (strpos($log_format, 'D') !== <b>false</b> &amp;&amp; file_put_contents($diff_filename, (binary) $diff, <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>) === <b>false</b>) <font color='red'>{</font>
+<a name='L1959'>                        <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot create test diff - $diff_filename");
+<a name='L1960'>                <font color='red'>}</font>
+<a name='L1961'>
+<a name='L1962'>                <i><font color='green'>// write .log</font></i>
+<a name='L1963'>                <b>if</b> (strpos($log_format, 'L') !== <b>false</b> &amp;&amp; file_put_contents($log_filename, b"
+<a name='L1964'>---- EXPECTED OUTPUT
+<a name='L1965'>$wanted
+<a name='L1966'>---- ACTUAL OUTPUT
+<a name='L1967'>$output
+<a name='L1968'>---- FAILED
+<a name='L1969'>", <a href='../S/44.html#L79' title='Defined at 79 in run-tests.php.'>FILE_BINARY</a>) === <b>false</b>) <font color='red'>{</font>
+<a name='L1970'>                        <a href='../S/44.html#L2122' title='Defined at 2122 in run-tests.php.'>error</a>("Cannot create test log - $log_filename");
+<a name='L1971'>                        <a href='../S/44.html#L1012' title='Defined at 1012 in run-tests.php.'>error_report</a>($file, $log_filename, $tested);
+<a name='L1972'>                <font color='red'>}</font>
+<a name='L1973'>        <font color='red'>}</font>
+<a name='L1974'>
+<a name='L1975'>        <a href='../S/44.html#L2398' title='Defined at 2398 in run-tests.php.'>show_result</a>(implode('&amp;', $restype), $tested, $tested_file, $info, $temp_filenames);
+<a name='L1976'>
+<a name='L1977'>        <b>foreach</b> ($restype <b>as</b> $type) <font color='red'>{</font>
+<a name='L1978'>                $PHP_FAILED_TESTS[$type.'ED'][] = <b>array</b> (
+<a name='L1979'>                        'name'      =&gt; $file,
+<a name='L1980'>                        'test_name' =&gt; (<b>is_array</b>($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
+<a name='L1981'>                        'output'    =&gt; $output_filename,
+<a name='L1982'>                        'diff'      =&gt; $diff_filename,
+<a name='L1983'>                        'info'      =&gt; $info,
+<a name='L1984'>                );
+<a name='L1985'>        <font color='red'>}</font>
+<a name='L1986'>
+<a name='L1987'>        <b>if</b> (isset($old_php)) <font color='red'>{</font>
+<a name='L1988'>                $php = $old_php;
+<a name='L1989'>        <font color='red'>}</font>
+<a name='L1990'>
+<a name='L1991'>        <b>return</b> $restype[0] . 'ED';
+<a name='L1992'><font color='red'>}</font>
+<a name='L1993'>
+<a name='L1994'><b>function</b> <a href='../R/69.html' title='Multiple refered from 2 places.'>comp_line</a>($l1, $l2, $is_reg)
+<a name='L1995'><font color='red'>{</font>
+<a name='L1996'>        <b>if</b> ($is_reg) <font color='red'>{</font>
+<a name='L1997'>                <b>return</b> preg_match(b'/^'. (binary) $l1 . b'$/s', (binary) $l2);
+<a name='L1998'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L1999'>                <b>return</b> !strcmp((binary) $l1, (binary) $l2);
+<a name='L2000'>        <font color='red'>}</font>
+<a name='L2001'><font color='red'>}</font>
+<a name='L2002'>
+<a name='L2003'><b>function</b> <a href='../R/71.html' title='Multiple refered from 4 places.'>count_array_diff</a>($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2, $steps)
+<a name='L2004'><font color='red'>{</font>
+<a name='L2005'>        $equal = 0;
+<a name='L2006'>
+<a name='L2007'>        <b>while</b> ($idx1 &lt; $cnt1 &amp;&amp; $idx2 &lt; $cnt2 &amp;&amp; <a href='../S/44.html#L1994' title='Defined at 1994 in run-tests.php.'>comp_line</a>($ar1[$idx1], $ar2[$idx2], $is_reg)) <font color='red'>{</font>
+<a name='L2008'>                $idx1++;
+<a name='L2009'>                $idx2++;
+<a name='L2010'>                $equal++;
+<a name='L2011'>                $steps--;
+<a name='L2012'>        <font color='red'>}</font>
+<a name='L2013'>        <b>if</b> (--$steps &gt; 0) <font color='red'>{</font>
+<a name='L2014'>                $eq1 = 0;
+<a name='L2015'>                $st = $steps / 2;
+<a name='L2016'>
+<a name='L2017'>                <b>for</b> ($ofs1 = $idx1 + 1; $ofs1 &lt; $cnt1 &amp;&amp; $st-- &gt; 0; $ofs1++) <font color='red'>{</font>
+<a name='L2018'>                        $eq = @<a href='../S/44.html#L2003' title='Defined at 2003 in run-tests.php.'>count_array_diff</a>($ar1, $ar2, $is_reg, $w, $ofs1, $idx2, $cnt1, $cnt2, $st);
+<a name='L2019'>
+<a name='L2020'>                        <b>if</b> ($eq &gt; $eq1) <font color='red'>{</font>
+<a name='L2021'>                                $eq1 = $eq;
+<a name='L2022'>                        <font color='red'>}</font>
+<a name='L2023'>                <font color='red'>}</font>
+<a name='L2024'>
+<a name='L2025'>                $eq2 = 0;
+<a name='L2026'>                $st = $steps;
+<a name='L2027'>
+<a name='L2028'>                <b>for</b> ($ofs2 = $idx2 + 1; $ofs2 &lt; $cnt2 &amp;&amp; $st-- &gt; 0; $ofs2++) <font color='red'>{</font>
+<a name='L2029'>                        $eq = @<a href='../S/44.html#L2003' title='Defined at 2003 in run-tests.php.'>count_array_diff</a>($ar1, $ar2, $is_reg, $w, $idx1, $ofs2, $cnt1, $cnt2, $st);
+<a name='L2030'>                        <b>if</b> ($eq &gt; $eq2) <font color='red'>{</font>
+<a name='L2031'>                                $eq2 = $eq;
+<a name='L2032'>                        <font color='red'>}</font>
+<a name='L2033'>                <font color='red'>}</font>
+<a name='L2034'>
+<a name='L2035'>                <b>if</b> ($eq1 &gt; $eq2) <font color='red'>{</font>
+<a name='L2036'>                        $equal += $eq1;
+<a name='L2037'>                <font color='red'>}</font> <b>else</b> <b>if</b> ($eq2 &gt; 0) <font color='red'>{</font>
+<a name='L2038'>                        $equal += $eq2;
+<a name='L2039'>                <font color='red'>}</font>
+<a name='L2040'>        <font color='red'>}</font>
+<a name='L2041'>
+<a name='L2042'>        <b>return</b> $equal;
+<a name='L2043'><font color='red'>}</font>
+<a name='L2044'>
+<a name='L2045'><b>function</b> <a href='../S/44.html#L2117' title='Refered from 2117 in run-tests.php.'>generate_array_diff</a>($ar1, $ar2, $is_reg, $w)
+<a name='L2046'><font color='red'>{</font>
+<a name='L2047'>        $idx1 = 0; $ofs1 = 0; $cnt1 = @count($ar1);
+<a name='L2048'>        $idx2 = 0; $ofs2 = 0; $cnt2 = @count($ar2);
+<a name='L2049'>        $diff = <b>array</b>();
+<a name='L2050'>        $old1 = <b>array</b>();
+<a name='L2051'>        $old2 = <b>array</b>();
+<a name='L2052'>
+<a name='L2053'>        <b>while</b> ($idx1 &lt; $cnt1 &amp;&amp; $idx2 &lt; $cnt2) <font color='red'>{</font>
+<a name='L2054'>
+<a name='L2055'>                <b>if</b> (<a href='../S/44.html#L1994' title='Defined at 1994 in run-tests.php.'>comp_line</a>($ar1[$idx1], $ar2[$idx2], $is_reg)) <font color='red'>{</font>
+<a name='L2056'>                        $idx1++;
+<a name='L2057'>                        $idx2++;
+<a name='L2058'>                        <b>continue</b>;
+<a name='L2059'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2060'>
+<a name='L2061'>                        $c1 = @<a href='../S/44.html#L2003' title='Defined at 2003 in run-tests.php.'>count_array_diff</a>($ar1, $ar2, $is_reg, $w, $idx1+1, $idx2, $cnt1, $cnt2, 10);
+<a name='L2062'>                        $c2 = @<a href='../S/44.html#L2003' title='Defined at 2003 in run-tests.php.'>count_array_diff</a>($ar1, $ar2, $is_reg, $w, $idx1, $idx2+1, $cnt1,  $cnt2, 10);
+<a name='L2063'>
+<a name='L2064'>                        <b>if</b> ($c1 &gt; $c2) <font color='red'>{</font>
+<a name='L2065'>                                $old1[$idx1] = (binary) sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+<a name='L2066'>                                $last = 1;
+<a name='L2067'>                        <font color='red'>}</font> <b>else</b> <b>if</b> ($c2 &gt; 0) <font color='red'>{</font>
+<a name='L2068'>                                $old2[$idx2] = (binary) sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+<a name='L2069'>                                $last = 2;
+<a name='L2070'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2071'>                                $old1[$idx1] = (binary) sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+<a name='L2072'>                                $old2[$idx2] = (binary) sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+<a name='L2073'>                        <font color='red'>}</font>
+<a name='L2074'>                <font color='red'>}</font>
+<a name='L2075'>        <font color='red'>}</font>
+<a name='L2076'>
+<a name='L2077'>        reset($old1); $k1 = key($old1); $l1 = -2;
+<a name='L2078'>        reset($old2); $k2 = key($old2); $l2 = -2;
+<a name='L2079'>
+<a name='L2080'>        <b>while</b> ($k1 !== null || $k2 !== null) <font color='red'>{</font>
+<a name='L2081'>
+<a name='L2082'>                <b>if</b> ($k1 == $l1 + 1 || $k2 === null) <font color='red'>{</font>
+<a name='L2083'>                        $l1 = $k1;
+<a name='L2084'>                        $diff[] = current($old1);
+<a name='L2085'>                        $k1 = next($old1) ? key($old1) : null;
+<a name='L2086'>                <font color='red'>}</font> <b>else</b> <b>if</b> ($k2 == $l2 + 1 || $k1 === null) <font color='red'>{</font>
+<a name='L2087'>                        $l2 = $k2;
+<a name='L2088'>                        $diff[] = current($old2);
+<a name='L2089'>                        $k2 = next($old2) ? key($old2) : null;
+<a name='L2090'>                <font color='red'>}</font> <b>else</b> <b>if</b> ($k1 &lt; $k2) <font color='red'>{</font>
+<a name='L2091'>                        $l1 = $k1;
+<a name='L2092'>                        $diff[] = current($old1);
+<a name='L2093'>                        $k1 = next($old1) ? key($old1) : null;
+<a name='L2094'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2095'>                        $l2 = $k2;
+<a name='L2096'>                        $diff[] = current($old2);
+<a name='L2097'>                        $k2 = next($old2) ? key($old2) : null;
+<a name='L2098'>                <font color='red'>}</font>
+<a name='L2099'>        <font color='red'>}</font>
+<a name='L2100'>
+<a name='L2101'>        <b>while</b> ($idx1 &lt; $cnt1) <font color='red'>{</font>
+<a name='L2102'>                $diff[] = (binary) sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
+<a name='L2103'>        <font color='red'>}</font>
+<a name='L2104'>
+<a name='L2105'>        <b>while</b> ($idx2 &lt; $cnt2) <font color='red'>{</font>
+<a name='L2106'>                $diff[] = (binary) sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
+<a name='L2107'>        <font color='red'>}</font>
+<a name='L2108'>
+<a name='L2109'>        <b>return</b> $diff;
+<a name='L2110'><font color='red'>}</font>
+<a name='L2111'>
+<a name='L2112'><b>function</b> <a href='../S/44.html#L1953' title='Refered from 1953 in run-tests.php.'>generate_diff</a>($wanted, $wanted_re, $output)
+<a name='L2113'><font color='red'>{</font>
+<a name='L2114'>        $w = explode(b"\n", $wanted);
+<a name='L2115'>        $o = explode(b"\n", $output);
+<a name='L2116'>        $r = is_null($wanted_re) ? $w : explode(b"\n", $wanted_re);
+<a name='L2117'>        $diff = <a href='../S/44.html#L2045' title='Defined at 2045 in run-tests.php.'>generate_array_diff</a>($r, $o, !is_null($wanted_re), $w);
+<a name='L2118'>
+<a name='L2119'>        <b>return</b> implode(b"\r\n", $diff);
+<a name='L2120'><font color='red'>}</font>
+<a name='L2121'>
+<a name='L2122'><b>function</b> <a href='../R/74.html' title='Multiple refered from 13 places.'>error</a>($message)
+<a name='L2123'><font color='red'>{</font>
+<a name='L2124'>        <b>echo</b> "ERROR: {$message}\n";
+<a name='L2125'>        <b>exit</b>(1);
+<a name='L2126'><font color='red'>}</font>
+<a name='L2127'>
+<a name='L2128'><b>function</b> <a href='../R/97.html' title='Multiple refered from 4 places.'>settings2array</a>($settings, &amp;$ini_settings)
+<a name='L2129'><font color='red'>{</font>
+<a name='L2130'>        <b>foreach</b>($settings <b>as</b> $setting) <font color='red'>{</font>
+<a name='L2131'>
+<a name='L2132'>                <b>if</b> (strpos($setting, '=') !== <b>false</b>) <font color='red'>{</font>
+<a name='L2133'>                        $setting = explode("=", $setting, 2);
+<a name='L2134'>                        $name = trim(strtolower($setting[0]));
+<a name='L2135'>                        $value = trim($setting[1]);
+<a name='L2136'>
+<a name='L2137'>                        <b>if</b> ($name == 'extension') <font color='red'>{</font>
+<a name='L2138'>
+<a name='L2139'>                                <b>if</b> (!isset($ini_settings[$name])) <font color='red'>{</font>
+<a name='L2140'>                                        $ini_settings[$name] = <b>array</b>();
+<a name='L2141'>                                <font color='red'>}</font>
+<a name='L2142'>
+<a name='L2143'>                                $ini_settings[$name][] = $value;
+<a name='L2144'>
+<a name='L2145'>                        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2146'>                                $ini_settings[$name] = $value;
+<a name='L2147'>                        <font color='red'>}</font>
+<a name='L2148'>                <font color='red'>}</font>
+<a name='L2149'>        <font color='red'>}</font>
+<a name='L2150'><font color='red'>}</font>
+<a name='L2151'>
+<a name='L2152'><b>function</b> <a href='../R/98.html' title='Multiple refered from 3 places.'>settings2params</a>(&amp;$ini_settings)
+<a name='L2153'><font color='red'>{</font>
+<a name='L2154'>        $settings = '';
+<a name='L2155'>
+<a name='L2156'>        <b>foreach</b>($ini_settings <b>as</b> $name =&gt; $value) <font color='red'>{</font>
+<a name='L2157'>
+<a name='L2158'>                <b>if</b> (<b>is_array</b>($value)) <font color='red'>{</font>
+<a name='L2159'>                        <b>foreach</b>($value <b>as</b> $val) <font color='red'>{</font>
+<a name='L2160'>                                $val = addslashes($val);
+<a name='L2161'>                                $settings .= " -d \"$name=$val\"";
+<a name='L2162'>                        <font color='red'>}</font>
+<a name='L2163'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2164'>                        $value = addslashes($value);
+<a name='L2165'>                        $settings .= " -d \"$name=$value\"";
+<a name='L2166'>                <font color='red'>}</font>
+<a name='L2167'>        <font color='red'>}</font>
+<a name='L2168'>
+<a name='L2169'>        $ini_settings = $settings;
+<a name='L2170'><font color='red'>}</font>
+<a name='L2171'>
+<a name='L2172'><b>function</b> <a href='../R/70.html' title='Multiple refered from 2 places.'>compute_summary</a>()
+<a name='L2173'><font color='red'>{</font>
+<a name='L2174'>        <b>global</b> $n_total, $test_results, $ignored_by_ext, $sum_results, $percent_results;
+<a name='L2175'>
+<a name='L2176'>        $n_total = count($test_results);
+<a name='L2177'>        $n_total += $ignored_by_ext;
+<a name='L2178'>        $sum_results = <b>array</b>(
+<a name='L2179'>                'PASSED'  =&gt; 0,
+<a name='L2180'>                'WARNED'  =&gt; 0,
+<a name='L2181'>                'SKIPPED' =&gt; 0,
+<a name='L2182'>                'FAILED'  =&gt; 0,
+<a name='L2183'>                'BORKED'  =&gt; 0,
+<a name='L2184'>                'LEAKED'  =&gt; 0,
+<a name='L2185'>                'XFAILED' =&gt; 0
+<a name='L2186'>        );
+<a name='L2187'>
+<a name='L2188'>        <b>foreach</b> ($test_results <b>as</b> $v) <font color='red'>{</font>
+<a name='L2189'>                $sum_results[$v]++;
+<a name='L2190'>        <font color='red'>}</font>
+<a name='L2191'>
+<a name='L2192'>        $sum_results['SKIPPED'] += $ignored_by_ext;
+<a name='L2193'>        $percent_results = <b>array</b>();
+<a name='L2194'>
+<a name='L2195'>        <b>while</b> (<b>list</b>($v, $n) = <b>each</b>($sum_results)) <font color='red'>{</font>
+<a name='L2196'>                $percent_results[$v] = (100.0 * $n) / $n_total;
+<a name='L2197'>        <font color='red'>}</font>
+<a name='L2198'><font color='red'>}</font>
+<a name='L2199'>
+<a name='L2200'><b>function</b> <a href='../R/81.html' title='Multiple refered from 5 places.'>get_summary</a>($show_ext_summary, $show_html)
+<a name='L2201'><font color='red'>{</font>
+<a name='L2202'>        <b>global</b> $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS, $leak_check;
+<a name='L2203'>
+<a name='L2204'>        $x_total = $n_total - $sum_results['SKIPPED'] - $sum_results['BORKED'];
+<a name='L2205'>
+<a name='L2206'>        <b>if</b> ($x_total) <font color='red'>{</font>
+<a name='L2207'>                $x_warned = (100.0 * $sum_results['WARNED']) / $x_total;
+<a name='L2208'>                $x_failed = (100.0 * $sum_results['FAILED']) / $x_total;
+<a name='L2209'>                $x_xfailed = (100.0 * $sum_results['XFAILED']) / $x_total;
+<a name='L2210'>                $x_leaked = (100.0 * $sum_results['LEAKED']) / $x_total;
+<a name='L2211'>                $x_passed = (100.0 * $sum_results['PASSED']) / $x_total;
+<a name='L2212'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2213'>                $x_warned = $x_failed = $x_passed = $x_leaked = $x_xfailed = 0;
+<a name='L2214'>        <font color='red'>}</font>
+<a name='L2215'>
+<a name='L2216'>        $summary = '';
+<a name='L2217'>
+<a name='L2218'>        <b>if</b> ($show_html) <font color='red'>{</font>
+<a name='L2219'>                $summary .= "&lt;pre&gt;\n";
+<a name='L2220'>        <font color='red'>}</font>
+<a name='L2221'>        
+<a name='L2222'>        <b>if</b> ($show_ext_summary) <font color='red'>{</font>
+<a name='L2223'>                $summary .= '
+<a name='L2224'>=====================================================================
+<a name='L2225'>TEST RESULT SUMMARY
+<a name='L2226'>---------------------------------------------------------------------
+<a name='L2227'>Exts skipped    : ' . sprintf('%4d', $exts_skipped) . '
+<a name='L2228'>Exts tested     : ' . sprintf('%4d', $exts_tested) . '
+<a name='L2229'>---------------------------------------------------------------------
+<a name='L2230'>';
+<a name='L2231'>        <font color='red'>}</font>
+<a name='L2232'>
+<a name='L2233'>        $summary .= '
+<a name='L2234'>Number of tests : ' . sprintf('%4d', $n_total) . '          ' . sprintf('%8d', $x_total);
+<a name='L2235'>
+<a name='L2236'>        <b>if</b> ($sum_results['BORKED']) <font color='red'>{</font>
+<a name='L2237'>                $summary .= '
+<a name='L2238'>Tests borked    : ' . sprintf('%4d (%5.1f%%)', $sum_results['BORKED'], $percent_results['BORKED']) . ' --------';
+<a name='L2239'>        <font color='red'>}</font>
+<a name='L2240'>
+<a name='L2241'>        $summary .= '
+<a name='L2242'>Tests skipped   : ' . sprintf('%4d (%5.1f%%)', $sum_results['SKIPPED'], $percent_results['SKIPPED']) . ' --------
+<a name='L2243'>Tests warned    : ' . sprintf('%4d (%5.1f%%)', $sum_results['WARNED'], $percent_results['WARNED']) . ' ' . sprintf('(%5.1f%%)', $x_warned) . '
+<a name='L2244'>Tests failed    : ' . sprintf('%4d (%5.1f%%)', $sum_results['FAILED'], $percent_results['FAILED']) . ' ' . sprintf('(%5.1f%%)', $x_failed) . '
+<a name='L2245'>Expected fail   : ' . sprintf('%4d (%5.1f%%)', $sum_results['XFAILED'], $percent_results['XFAILED']) . ' ' . sprintf('(%5.1f%%)', $x_xfailed);
+<a name='L2246'>
+<a name='L2247'>        <b>if</b> ($leak_check) <font color='red'>{</font>
+<a name='L2248'>                $summary .= '
+<a name='L2249'>Tests leaked    : ' . sprintf('%4d (%5.1f%%)', $sum_results['LEAKED'], $percent_results['LEAKED']) . ' ' . sprintf('(%5.1f%%)', $x_leaked);
+<a name='L2250'>        <font color='red'>}</font>
+<a name='L2251'>
+<a name='L2252'>        $summary .= '
+<a name='L2253'>Tests passed    : ' . sprintf('%4d (%5.1f%%)', $sum_results['PASSED'], $percent_results['PASSED']) . ' ' . sprintf('(%5.1f%%)', $x_passed) . '
+<a name='L2254'>---------------------------------------------------------------------
+<a name='L2255'>Time taken      : ' . sprintf('%4d seconds', $end_time - $start_time) . '
+<a name='L2256'>=====================================================================
+<a name='L2257'>';
+<a name='L2258'>        $failed_test_summary = '';
+<a name='L2259'>
+<a name='L2260'>        <b>if</b> (count($PHP_FAILED_TESTS['BORKED'])) <font color='red'>{</font>
+<a name='L2261'>                $failed_test_summary .= '
+<a name='L2262'>=====================================================================
+<a name='L2263'>BORKED TEST SUMMARY
+<a name='L2264'>---------------------------------------------------------------------
+<a name='L2265'>';
+<a name='L2266'>                <b>foreach</b> ($PHP_FAILED_TESTS['BORKED'] <b>as</b> $failed_test_data) <font color='red'>{</font>
+<a name='L2267'>                        $failed_test_summary .= $failed_test_data['info'] . "\n";
+<a name='L2268'>                <font color='red'>}</font>
+<a name='L2269'>
+<a name='L2270'>                $failed_test_summary .=  "=====================================================================\n";
+<a name='L2271'>        <font color='red'>}</font>
+<a name='L2272'>
+<a name='L2273'>        <b>if</b> (count($PHP_FAILED_TESTS['FAILED'])) <font color='red'>{</font>
+<a name='L2274'>                $failed_test_summary .= '
+<a name='L2275'>=====================================================================
+<a name='L2276'>FAILED TEST SUMMARY
+<a name='L2277'>---------------------------------------------------------------------
+<a name='L2278'>';
+<a name='L2279'>                <b>foreach</b> ($PHP_FAILED_TESTS['FAILED'] <b>as</b> $failed_test_data) <font color='red'>{</font>
+<a name='L2280'>                        $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+<a name='L2281'>                <font color='red'>}</font>
+<a name='L2282'>                $failed_test_summary .=  "=====================================================================\n";
+<a name='L2283'>        <font color='red'>}</font>
+<a name='L2284'>        <b>if</b> (count($PHP_FAILED_TESTS['XFAILED'])) <font color='red'>{</font>
+<a name='L2285'>                $failed_test_summary .= '
+<a name='L2286'>=====================================================================
+<a name='L2287'>EXPECTED FAILED TEST SUMMARY
+<a name='L2288'>---------------------------------------------------------------------
+<a name='L2289'>';
+<a name='L2290'>                <b>foreach</b> ($PHP_FAILED_TESTS['XFAILED'] <b>as</b> $failed_test_data) <font color='red'>{</font>
+<a name='L2291'>                        $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+<a name='L2292'>                <font color='red'>}</font>
+<a name='L2293'>                $failed_test_summary .=  "=====================================================================\n";
+<a name='L2294'>        <font color='red'>}</font>
+<a name='L2295'>
+<a name='L2296'>        <b>if</b> (count($PHP_FAILED_TESTS['WARNED'])) <font color='red'>{</font>
+<a name='L2297'>                $failed_test_summary .= '
+<a name='L2298'>=====================================================================
+<a name='L2299'>WARNED TEST SUMMARY
+<a name='L2300'>---------------------------------------------------------------------
+<a name='L2301'>';
+<a name='L2302'>                <b>foreach</b> ($PHP_FAILED_TESTS['WARNED'] <b>as</b> $failed_test_data) <font color='red'>{</font>
+<a name='L2303'>                        $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+<a name='L2304'>                <font color='red'>}</font>
+<a name='L2305'>
+<a name='L2306'>                $failed_test_summary .=  "=====================================================================\n";
+<a name='L2307'>        <font color='red'>}</font>
+<a name='L2308'>
+<a name='L2309'>        <b>if</b> (count($PHP_FAILED_TESTS['LEAKED'])) <font color='red'>{</font>
+<a name='L2310'>                $failed_test_summary .= '
+<a name='L2311'>=====================================================================
+<a name='L2312'>LEAKED TEST SUMMARY
+<a name='L2313'>---------------------------------------------------------------------
+<a name='L2314'>';
+<a name='L2315'>                <b>foreach</b> ($PHP_FAILED_TESTS['LEAKED'] <b>as</b> $failed_test_data) <font color='red'>{</font>
+<a name='L2316'>                        $failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+<a name='L2317'>                <font color='red'>}</font>
+<a name='L2318'>
+<a name='L2319'>                $failed_test_summary .=  "=====================================================================\n";
+<a name='L2320'>        <font color='red'>}</font>
+<a name='L2321'>
+<a name='L2322'>        <b>if</b> ($failed_test_summary &amp;&amp; !getenv('NO_PHPTEST_SUMMARY')) <font color='red'>{</font>
+<a name='L2323'>                $summary .= $failed_test_summary;
+<a name='L2324'>        <font color='red'>}</font>
+<a name='L2325'>
+<a name='L2326'>        <b>if</b> ($show_html) <font color='red'>{</font>
+<a name='L2327'>                $summary .= "&lt;/pre&gt;";
+<a name='L2328'>        <font color='red'>}</font>
+<a name='L2329'>
+<a name='L2330'>        <b>return</b> $summary;
+<a name='L2331'><font color='red'>}</font>
+<a name='L2332'>
+<a name='L2333'><b>function</b> <a href='../R/104.html' title='Multiple refered from 2 places.'>show_start</a>($start_time)
+<a name='L2334'><font color='red'>{</font>
+<a name='L2335'>        <b>global</b> $html_output, $html_file;
+<a name='L2336'>
+<a name='L2337'>        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L2338'>                fwrite($html_file, "&lt;h2&gt;Time Start: " . date('Y-m-d H:i:s', $start_time) . "&lt;/h2&gt;\n");
+<a name='L2339'>                fwrite($html_file, "&lt;table&gt;\n");
+<a name='L2340'>        <font color='red'>}</font>
+<a name='L2341'>
+<a name='L2342'>        <b>echo</b> "TIME START " . date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
+<a name='L2343'><font color='red'>}</font>
+<a name='L2344'>
+<a name='L2345'><b>function</b> <a href='../R/99.html' title='Multiple refered from 2 places.'>show_end</a>($end_time)
+<a name='L2346'><font color='red'>{</font>
+<a name='L2347'>        <b>global</b> $html_output, $html_file;
+<a name='L2348'>
+<a name='L2349'>        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L2350'>                fwrite($html_file, "&lt;/table&gt;\n");
+<a name='L2351'>                fwrite($html_file, "&lt;h2&gt;Time End: " . date('Y-m-d H:i:s', $end_time) . "&lt;/h2&gt;\n");
+<a name='L2352'>        <font color='red'>}</font>
+<a name='L2353'>
+<a name='L2354'>        <b>echo</b> "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
+<a name='L2355'><font color='red'>}</font>
+<a name='L2356'>
+<a name='L2357'><b>function</b> <a href='../S/44.html#L933' title='Refered from 933 in run-tests.php.'>show_summary</a>()
+<a name='L2358'><font color='red'>{</font>
+<a name='L2359'>        <b>global</b> $html_output, $html_file;
+<a name='L2360'>
+<a name='L2361'>        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L2362'>                fwrite($html_file, "&lt;hr/&gt;\n" . <a href='../S/44.html#L2200' title='Defined at 2200 in run-tests.php.'>get_summary</a>(<b>true</b>, <b>true</b>));
+<a name='L2363'>        <font color='red'>}</font>
+<a name='L2364'>
+<a name='L2365'>        <b>echo</b> <a href='../S/44.html#L2200' title='Defined at 2200 in run-tests.php.'>get_summary</a>(<b>true</b>, <b>false</b>);
+<a name='L2366'><font color='red'>}</font>
+<a name='L2367'>
+<a name='L2368'><b>function</b> <a href='../S/44.html#L1528' title='Refered from 1528 in run-tests.php.'>show_redirect_start</a>($tests, $tested, $tested_file)
+<a name='L2369'><font color='red'>{</font>
+<a name='L2370'>        <b>global</b> $html_output, $html_file;
+<a name='L2371'>
+<a name='L2372'>        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L2373'>                fwrite($html_file, "&lt;tr&gt;&lt;td colspan='3'&gt;---&amp;gt; $tests ($tested [$tested_file]) begin&lt;/td&gt;&lt;/tr&gt;\n");
+<a name='L2374'>        <font color='red'>}</font>
+<a name='L2375'>
+<a name='L2376'>        <b>echo</b> "---&gt; $tests ($tested [$tested_file]) begin\n";
+<a name='L2377'><font color='red'>}</font>
+<a name='L2378'>
+<a name='L2379'><b>function</b> <a href='../S/44.html#L1537' title='Refered from 1537 in run-tests.php.'>show_redirect_ends</a>($tests, $tested, $tested_file)
+<a name='L2380'><font color='red'>{</font>
+<a name='L2381'>        <b>global</b> $html_output, $html_file;
+<a name='L2382'>
+<a name='L2383'>        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L2384'>                fwrite($html_file, "&lt;tr&gt;&lt;td colspan='3'&gt;---&amp;gt; $tests ($tested [$tested_file]) done&lt;/td&gt;&lt;/tr&gt;\n");
+<a name='L2385'>        <font color='red'>}</font>
+<a name='L2386'>
+<a name='L2387'>        <b>echo</b> "---&gt; $tests ($tested [$tested_file]) done\n";
+<a name='L2388'><font color='red'>}</font>
+<a name='L2389'>
+<a name='L2390'><b>function</b> <a href='../S/44.html#L1336' title='Refered from 1336 in run-tests.php.'>show_test</a>($test_idx, $shortname)
+<a name='L2391'><font color='red'>{</font>
+<a name='L2392'>        <b>global</b> $test_cnt;
+<a name='L2393'>
+<a name='L2394'>        <b>echo</b> "TEST $test_idx/$test_cnt [$shortname]\r";
+<a name='L2395'>        flush();
+<a name='L2396'><font color='red'>}</font>
+<a name='L2397'>
+<a name='L2398'><b>function</b> <a href='../R/103.html' title='Multiple refered from 9 places.'>show_result</a>($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
+<a name='L2399'><font color='red'>{</font>
+<a name='L2400'>        <b>global</b> $html_output, $html_file, $temp_target, $temp_urlbase;
+<a name='L2401'>
+<a name='L2402'>        <b>echo</b> "$result $tested [$tested_file] $extra\n";
+<a name='L2403'>
+<a name='L2404'>        <b>if</b> ($html_output) <font color='red'>{</font>
+<a name='L2405'>
+<a name='L2406'>                <b>if</b> (isset($temp_filenames['file']) &amp;&amp; file_exists($temp_filenames['file'])) <font color='red'>{</font>
+<a name='L2407'>                        $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['file']);
+<a name='L2408'>                        $tested = "&lt;a href='$url'&gt;$tested&lt;/a&gt;";
+<a name='L2409'>                <font color='red'>}</font>
+<a name='L2410'>
+<a name='L2411'>                <b>if</b> (isset($temp_filenames['skip']) &amp;&amp; file_exists($temp_filenames['skip'])) <font color='red'>{</font>
+<a name='L2412'>
+<a name='L2413'>                        <b>if</b> (<b>empty</b>($extra)) <font color='red'>{</font>
+<a name='L2414'>                                $extra = "skipif";
+<a name='L2415'>                        <font color='red'>}</font>
+<a name='L2416'>
+<a name='L2417'>                        $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['skip']);
+<a name='L2418'>                        $extra = "&lt;a href='$url'&gt;$extra&lt;/a&gt;";
+<a name='L2419'>
+<a name='L2420'>                <font color='red'>}</font> <b>else</b> <b>if</b> (<b>empty</b>($extra)) <font color='red'>{</font>
+<a name='L2421'>                        $extra = "&amp;nbsp;";
+<a name='L2422'>                <font color='red'>}</font>
+<a name='L2423'>
+<a name='L2424'>                <b>if</b> (isset($temp_filenames['diff']) &amp;&amp; file_exists($temp_filenames['diff'])) <font color='red'>{</font>
+<a name='L2425'>                        $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['diff']);
+<a name='L2426'>                        $diff = "&lt;a href='$url'&gt;diff&lt;/a&gt;";
+<a name='L2427'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2428'>                        $diff = "&amp;nbsp;";
+<a name='L2429'>                <font color='red'>}</font>
+<a name='L2430'>
+<a name='L2431'>                <b>if</b> (isset($temp_filenames['mem']) &amp;&amp; file_exists($temp_filenames['mem'])) <font color='red'>{</font>
+<a name='L2432'>                        $url = str_replace($temp_target, $temp_urlbase, $temp_filenames['mem']);
+<a name='L2433'>                        $mem = "&lt;a href='$url'&gt;leaks&lt;/a&gt;";
+<a name='L2434'>                <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L2435'>                        $mem = "&amp;nbsp;";
+<a name='L2436'>                <font color='red'>}</font>
+<a name='L2437'>
+<a name='L2438'>                fwrite($html_file, 
+<a name='L2439'>                        "&lt;tr&gt;" .
+<a name='L2440'>                        "&lt;td&gt;$result&lt;/td&gt;" .
+<a name='L2441'>                        "&lt;td&gt;$tested&lt;/td&gt;" .
+<a name='L2442'>                        "&lt;td&gt;$extra&lt;/td&gt;" .
+<a name='L2443'>                        "&lt;td&gt;$diff&lt;/td&gt;" . 
+<a name='L2444'>                        "&lt;td&gt;$mem&lt;/td&gt;" .
+<a name='L2445'>                        "&lt;/tr&gt;\n");
+<a name='L2446'>        <font color='red'>}</font>
+<a name='L2447'><font color='red'>}</font>
+<a name='L2448'>
+<a name='L2449'><i><font color='green'>/*</font></i>
+<a name='L2450'><i><font color='green'> * Local variables:</font></i>
+<a name='L2451'><i><font color='green'> * tab-width: 4</font></i>
+<a name='L2452'><i><font color='green'> * c-basic-offset: 4</font></i>
+<a name='L2453'><i><font color='green'> * End:</font></i>
+<a name='L2454'><i><font color='green'> * vim: noet sw=4 ts=4</font></i>
+<a name='L2455'><i><font color='green'> */</font></i>
+<a name='L2456'>?&gt;
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L184'>[^]</a><a href='#L2398'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

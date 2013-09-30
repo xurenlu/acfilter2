@@ -1,0 +1,8 @@
+./acfilter.c:PHP_FUNCTION(confirm_acfilter_compiled)
+./acfilter.c:PHP_FUNCTION(acfilter_new)
+./acfilter.c:PHP_FUNCTION(acfilter_load_dict)
+./acfilter.c:PHP_FUNCTION(acfilter_add_word)
+./acfilter.c:PHP_FUNCTION(acfilter_prepare)
+./acfilter.c:PHP_FUNCTION(acfilter_check_text)
+./acfilter.c:PHP_FUNCTION(acfilter_close)
+./acfilter.c:PHP_FUNCTION(array_experiments) 

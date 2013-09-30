@@ -1,0 +1,99 @@
+<html>
+<head>
+<title>acseg_rbtree.h</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/acseg_rbtree.h</h2>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L65'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2><a href='../J/4.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<hr>
+<h2>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L65' title='Defined at 65.'>acseg_rbtree_min</a>
+</ol>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/*</font></i>
+<a name='L2'><i><font color='green'> * Copy from nginx, a little change</font></i>
+<a name='L3'><i><font color='green'> */</font></i>
+<a name='L4'>
+<a name='L5'>
+<a name='L6'><font color='darkred'>#ifndef</font> <a href='../S/47.html#L7' title='Defined at 7 in acseg_rbtree.h.'>_ACSEG_RBTREE_H_INCLUDED_</a>
+<a name='L7'><font color='darkred'>#define</font> <a href='../S/47.html#L6' title='Refered from 6 in acseg_rbtree.h.'>_ACSEG_RBTREE_H_INCLUDED_</a>
+<a name='L8'>
+<a name='L9'><font color='darkred'>#include</font> &lt;stdlib.h&gt;
+<a name='L10'><font color='darkred'>#include</font> &lt;stdint.h&gt;
+<a name='L11'>
+<a name='L12'><b>typedef</b> uint64_t  <a href='../R/53.html' title='Multiple refered from 6 places.'>acseg_rbtree_key_t</a>;
+<a name='L13'>
+<a name='L14'><b>typedef</b> <b>struct</b> <a href='../S/47.html#L18' title='Defined at 18 in acseg_rbtree.h.'>acseg_rbtree_node_s</a>  <a href='../R/57.html' title='Multiple refered from 45 places.'>acseg_rbtree_node_t</a>;
+<a name='L15'>
+<a name='L16'><b>typedef</b> <b>struct</b> <a href='../S/47.html#L32' title='Defined at 32 in acseg_rbtree.h.'>acseg_rbtree_s</a>  <a href='../R/62.html' title='Multiple refered from 10 places.'>acseg_rbtree_t</a>;
+<a name='L17'>
+<a name='L18'><b>struct</b> <a href='../S/47.html#L14' title='Refered from 14 in acseg_rbtree.h.'>acseg_rbtree_node_s</a> <font color='red'>{</font>
+<a name='L19'>    <a href='../S/47.html#L12' title='Defined at 12 in acseg_rbtree.h.'>acseg_rbtree_key_t</a>       key;
+<a name='L20'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>     *left;
+<a name='L21'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>     *right;
+<a name='L22'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>     *parent;
+<a name='L23'>    u_char                 color;
+<a name='L24'>
+<a name='L25'>        <b>void</b> *data;
+<a name='L26'><font color='red'>}</font>;
+<a name='L27'>
+<a name='L28'> 
+<a name='L29'><b>typedef</b> <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> * (*acseg_rbtree_insert_pt) (acseg_rbtree_node_t*root, 
+<a name='L30'>        acseg_rbtree_node_t*node, acseg_rbtree_node_t*sentinel);
+<a name='L31'>
+<a name='L32'><b>struct</b> <a href='../S/47.html#L16' title='Refered from 16 in acseg_rbtree.h.'>acseg_rbtree_s</a> <font color='red'>{</font>
+<a name='L33'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>     *root;
+<a name='L34'>    <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a>     *sentinel;
+<a name='L35'>        acseg_rbtree_insert_pt   insert;
+<a name='L36'><font color='red'>}</font>;
+<a name='L37'>
+<a name='L38'><font color='darkred'>#define</font> <a href='../S/21.html#L30' title='Refered from 30 in acseg_tree.c.'>acseg_rbtree_init</a>(tree, s, i)                                           \
+<a name='L39'>    <a href='../S/47.html#L60' title='Defined at 60 in acseg_rbtree.h.'>acseg_rbtree_sentinel_init</a>(s);                                              \
+<a name='L40'>    (tree)-&gt;root = s;                                                         \
+<a name='L41'>    (tree)-&gt;sentinel = s;                                                     \
+<a name='L42'>    (tree)-&gt;insert = i;
+<a name='L43'>
+<a name='L44'><b>void</b> <a href='../S/53.html#L23' title='Defined at 23 in acseg_rbtree.c.'>acseg_rbtree_insert</a>(<a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *tree, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node);
+<a name='L45'>
+<a name='L46'><b>void</b> <a href='../S/53.html#L123' title='Defined at 123 in acseg_rbtree.c.'>acseg_rbtree_delete</a>(<a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *tree, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node);
+<a name='L47'>
+<a name='L48'><a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> * <a href='../S/53.html#L349' title='Defined at 349 in acseg_rbtree.c.'>acseg_rbtree_search</a>(<a href='../S/47.html#L16' title='Defined at 16 in acseg_rbtree.h.'>acseg_rbtree_t</a> *tree, 
+<a name='L49'>        <a href='../S/47.html#L12' title='Defined at 12 in acseg_rbtree.h.'>acseg_rbtree_key_t</a> key);
+<a name='L50'>
+<a name='L51'><font color='darkred'>#define</font> <a href='../R/48.html' title='Multiple refered from 11 places.'>acseg_rbt_red</a>(node)               ((node)-&gt;color = 1)
+<a name='L52'><font color='darkred'>#define</font> <a href='../R/44.html' title='Multiple refered from 19 places.'>acseg_rbt_black</a>(node)             ((node)-&gt;color = 0)
+<a name='L53'><font color='darkred'>#define</font> <a href='../R/47.html' title='Multiple refered from 7 places.'>acseg_rbt_is_red</a>(node)            ((node)-&gt;color)
+<a name='L54'><font color='darkred'>#define</font> <a href='../R/46.html' title='Multiple refered from 5 places.'>acseg_rbt_is_black</a>(node)          (!<a href='../S/47.html#L53' title='Defined at 53 in acseg_rbtree.h.'>acseg_rbt_is_red</a>(node))
+<a name='L55'><font color='darkred'>#define</font> <a href='../R/45.html' title='Multiple refered from 3 places.'>acseg_rbt_copy_color</a>(n1, n2)      (n1-&gt;color = n2-&gt;color)
+<a name='L56'>
+<a name='L57'>
+<a name='L58'><i><font color='green'>/* a sentinel must be black */</font></i>
+<a name='L59'>
+<a name='L60'><font color='darkred'>#define</font> <a href='../S/47.html#L39' title='Refered from 39 in acseg_rbtree.h.'>acseg_rbtree_sentinel_init</a>(node)  <a href='../S/47.html#L52' title='Defined at 52 in acseg_rbtree.h.'>acseg_rbt_black</a>(node)
+<a name='L61'><a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> * <a href='../S/53.html#L98' title='Defined at 98 in acseg_rbtree.c.'>acseg_rbtree_insert_value</a>(
+<a name='L62'>                <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *temp, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel);
+<a name='L63'>
+<a name='L64'><b>static</b> <b>inline</b> <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *
+<a name='L65'><a href='../S/53.html#L142' title='Refered from 142 in acseg_rbtree.c.'>acseg_rbtree_min</a>(<a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *node, <a href='../S/47.html#L14' title='Defined at 14 in acseg_rbtree.h.'>acseg_rbtree_node_t</a> *sentinel)
+<a name='L66'><font color='red'>{</font>
+<a name='L67'>    <b>while</b> (node-&gt;left != sentinel) <font color='red'>{</font>
+<a name='L68'>        node = node-&gt;left;
+<a name='L69'>    <font color='red'>}</font>
+<a name='L70'>
+<a name='L71'>    <b>return</b> node;
+<a name='L72'><font color='red'>}</font>
+<a name='L73'>
+<a name='L74'><font color='darkred'>#endif</font> <i><font color='green'>/* _ACSEG_RBTREE_H_INCLUDED_ */</font></i>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;][^]<a href='#L65'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

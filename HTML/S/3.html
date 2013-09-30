@@ -1,0 +1,107 @@
+<html>
+<head>
+<title>php_acfilter.h</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/php_acfilter.h</h2>
+<i><font color='green'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2><a href='42.html#L28' title='Included from 28 in acfilter.c.'>INCLUDED FROM</a></h2>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/*</font></i>
+<a name='L2'><i><font color='green'>  +----------------------------------------------------------------------+</font></i>
+<a name='L3'><i><font color='green'>  | PHP Version 5                                                        |</font></i>
+<a name='L4'><i><font color='green'>  +----------------------------------------------------------------------+</font></i>
+<a name='L5'><i><font color='green'>  | Copyright (c) 1997-2007 The PHP Group                                |</font></i>
+<a name='L6'><i><font color='green'>  +----------------------------------------------------------------------+</font></i>
+<a name='L7'><i><font color='green'>  | This source file is subject to version 3.01 of the PHP license,      |</font></i>
+<a name='L8'><i><font color='green'>  | that is bundled with this package in the file LICENSE, and is        |</font></i>
+<a name='L9'><i><font color='green'>  | available through the world-wide-web at the following url:           |</font></i>
+<a name='L10'><i><font color='green'>  | http://www.php.net/license/3_01.txt                                  |</font></i>
+<a name='L11'><i><font color='green'>  | If you did not receive a copy of the PHP license and are unable to   |</font></i>
+<a name='L12'><i><font color='green'>  | obtain it through the world-wide-web, please send a note to          |</font></i>
+<a name='L13'><i><font color='green'>  | license@php.net so we can mail you a copy immediately.               |</font></i>
+<a name='L14'><i><font color='green'>  +----------------------------------------------------------------------+</font></i>
+<a name='L15'><i><font color='green'>  | Author:                                                              |</font></i>
+<a name='L16'><i><font color='green'>  +----------------------------------------------------------------------+</font></i>
+<a name='L17'><i><font color='green'>*/</font></i>
+<a name='L18'>
+<a name='L19'><i><font color='green'>/* $Id: header 226204 2007-01-01 19:32:10Z iliaa $ */</font></i>
+<a name='L20'>
+<a name='L21'><font color='darkred'>#ifndef</font> <a href='../S/3.html#L22' title='Defined at 22 in php_acfilter.h.'>PHP_ACFILTER_H</a>
+<a name='L22'><font color='darkred'>#define</font> <a href='../S/3.html#L21' title='Refered from 21 in php_acfilter.h.'>PHP_ACFILTER_H</a>
+<a name='L23'>
+<a name='L24'><b>extern</b> zend_module_entry acfilter_module_entry;
+<a name='L25'><font color='darkred'>#define</font> phpext_acfilter_ptr &amp;acfilter_module_entry
+<a name='L26'>
+<a name='L27'><font color='darkred'>#ifdef</font> PHP_WIN32
+<a name='L28'><font color='darkred'>#define</font> PHP_ACFILTER_API __declspec(dllexport)
+<a name='L29'><font color='darkred'>#else</font>
+<a name='L30'><font color='darkred'>#define</font> PHP_ACFILTER_API
+<a name='L31'><font color='darkred'>#endif</font>
+<a name='L32'>
+<a name='L33'><font color='darkred'>#ifdef</font> ZTS
+<a name='L34'><font color='darkred'>#include</font> "TSRM.h"
+<a name='L35'><font color='darkred'>#endif</font>
+<a name='L36'>
+<a name='L37'><a href='../S/42.html#L111' title='Defined at 111 in acfilter.c.'>PHP_MINIT_FUNCTION</a>(acfilter);
+<a name='L38'><a href='../S/42.html#L123' title='Defined at 123 in acfilter.c.'>PHP_MSHUTDOWN_FUNCTION</a>(acfilter);
+<a name='L39'><a href='../S/42.html#L135' title='Defined at 135 in acfilter.c.'>PHP_RINIT_FUNCTION</a>(acfilter);
+<a name='L40'><a href='../S/42.html#L144' title='Defined at 144 in acfilter.c.'>PHP_RSHUTDOWN_FUNCTION</a>(acfilter);
+<a name='L41'><a href='../S/42.html#L152' title='Defined at 152 in acfilter.c.'>PHP_MINFO_FUNCTION</a>(acfilter);
+<a name='L42'>
+<a name='L43'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(confirm_acfilter_compiled);        <i><font color='green'>/* For testing, remove later. */</font></i>
+<a name='L44'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(acfilter_new);
+<a name='L45'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(acfilter_load_dict);
+<a name='L46'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(acfilter_add_word);
+<a name='L47'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(acfilter_prepare);
+<a name='L48'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(acfilter_check_text);
+<a name='L49'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(acfilter_close);
+<a name='L50'><a href='../D/28.html' title='Multiple defined in 8 places.'>PHP_FUNCTION</a>(array_experiments);
+<a name='L51'>
+<a name='L52'><i><font color='green'>/* </font></i>
+<a name='L53'><i><font color='green'>        Declare any global variables you may need between the BEGIN</font></i>
+<a name='L54'><i><font color='green'>        and END macros here:     </font></i>
+<a name='L55'><i><font color='green'></font></i>
+<a name='L56'><i><font color='green'>ZEND_BEGIN_MODULE_GLOBALS(acfilter)</font></i>
+<a name='L57'><i><font color='green'>        long  global_value;</font></i>
+<a name='L58'><i><font color='green'>        char *global_string;</font></i>
+<a name='L59'><i><font color='green'>ZEND_END_MODULE_GLOBALS(acfilter)</font></i>
+<a name='L60'><i><font color='green'>*/</font></i>
+<a name='L61'>
+<a name='L62'><i><font color='green'>/* In every utility function you add that needs to use variables </font></i>
+<a name='L63'><i><font color='green'>   in php_acfilter_globals, call TSRMLS_FETCH(); after declaring other </font></i>
+<a name='L64'><i><font color='green'>   variables used by that function, or better yet, pass in TSRMLS_CC</font></i>
+<a name='L65'><i><font color='green'>   after the last function argument and declare your utility function</font></i>
+<a name='L66'><i><font color='green'>   with TSRMLS_DC after the last declared argument.  Always refer to</font></i>
+<a name='L67'><i><font color='green'>   the globals in your function as ACFILTER_G(variable).  You are </font></i>
+<a name='L68'><i><font color='green'>   encouraged to rename these macros something shorter, see</font></i>
+<a name='L69'><i><font color='green'>   examples in any other php module directory.</font></i>
+<a name='L70'><i><font color='green'>*/</font></i>
+<a name='L71'>
+<a name='L72'><font color='darkred'>#ifdef</font> ZTS
+<a name='L73'><font color='darkred'>#define</font> ACFILTER_G(v) TSRMG(acfilter_globals_id, zend_acfilter_globals *, v)
+<a name='L74'><font color='darkred'>#else</font>
+<a name='L75'><font color='darkred'>#define</font> ACFILTER_G(v) (acfilter_globals.v)
+<a name='L76'><font color='darkred'>#endif</font>
+<a name='L77'>
+<a name='L78'><font color='darkred'>#endif</font>  <i><font color='green'>/* PHP_ACFILTER_H */</font></i>
+<a name='L79'>
+<a name='L80'>
+<a name='L81'><i><font color='green'>/*</font></i>
+<a name='L82'><i><font color='green'> * Local variables:</font></i>
+<a name='L83'><i><font color='green'> * tab-width: 4</font></i>
+<a name='L84'><i><font color='green'> * c-basic-offset: 4</font></i>
+<a name='L85'><i><font color='green'> * End:</font></i>
+<a name='L86'><i><font color='green'> * vim600: noet sw=4 ts=4 fdm=marker</font></i>
+<a name='L87'><i><font color='green'> * vim&lt;600: noet sw=4 ts=4</font></i>
+<a name='L88'><i><font color='green'> */</font></i>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

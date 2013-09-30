@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>acseg_rbtree_node_t</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<pre>
+<a href='../S/53.html#L16'>acseg_rbtree_node_t</a>   16 acseg_rbtree.c static inline void acseg_rbtree_left_rotate(acseg_rbtree_node_t **root,
+<a href='../S/53.html#L17'>acseg_rbtree_node_t</a>   17 acseg_rbtree.c     acseg_rbtree_node_t *sentinel, acseg_rbtree_node_t *node);
+<a href='../S/53.html#L18'>acseg_rbtree_node_t</a>   18 acseg_rbtree.c static inline void acseg_rbtree_right_rotate(acseg_rbtree_node_t **root,
+<a href='../S/53.html#L19'>acseg_rbtree_node_t</a>   19 acseg_rbtree.c     acseg_rbtree_node_t *sentinel, acseg_rbtree_node_t *node);
+<a href='../S/53.html#L23'>acseg_rbtree_node_t</a>   23 acseg_rbtree.c acseg_rbtree_insert(acseg_rbtree_t *tree, acseg_rbtree_node_t *node)
+<a href='../S/53.html#L25'>acseg_rbtree_node_t</a>   25 acseg_rbtree.c     acseg_rbtree_node_t  **root, *temp, *sentinel;
+<a href='../S/53.html#L29'>acseg_rbtree_node_t</a>   29 acseg_rbtree.c     root = (acseg_rbtree_node_t **) &amp;tree-&gt;root;
+<a href='../S/53.html#L97'>acseg_rbtree_node_t</a>   97 acseg_rbtree.c acseg_rbtree_node_t *
+<a href='../S/53.html#L98'>acseg_rbtree_node_t</a>   98 acseg_rbtree.c acseg_rbtree_insert_value(acseg_rbtree_node_t *temp, acseg_rbtree_node_t *node,
+<a href='../S/53.html#L99'>acseg_rbtree_node_t</a>   99 acseg_rbtree.c     acseg_rbtree_node_t *sentinel)
+<a href='../S/53.html#L101'>acseg_rbtree_node_t</a>  101 acseg_rbtree.c     acseg_rbtree_node_t  **p;
+<a href='../S/53.html#L123'>acseg_rbtree_node_t</a>  123 acseg_rbtree.c acseg_rbtree_delete(acseg_rbtree_t *tree, acseg_rbtree_node_t *node)
+<a href='../S/53.html#L126'>acseg_rbtree_node_t</a>  126 acseg_rbtree.c     acseg_rbtree_node_t  **root, *sentinel, *subst, *temp, *w;
+<a href='../S/53.html#L130'>acseg_rbtree_node_t</a>  130 acseg_rbtree.c     root = (acseg_rbtree_node_t **) &amp;tree-&gt;root;
+<a href='../S/53.html#L290'>acseg_rbtree_node_t</a>  290 acseg_rbtree.c acseg_rbtree_left_rotate(acseg_rbtree_node_t **root, acseg_rbtree_node_t *sentinel,
+<a href='../S/53.html#L291'>acseg_rbtree_node_t</a>  291 acseg_rbtree.c     acseg_rbtree_node_t *node)
+<a href='../S/53.html#L293'>acseg_rbtree_node_t</a>  293 acseg_rbtree.c     acseg_rbtree_node_t  *temp;
+<a href='../S/53.html#L320'>acseg_rbtree_node_t</a>  320 acseg_rbtree.c acseg_rbtree_right_rotate(acseg_rbtree_node_t **root, acseg_rbtree_node_t *sentinel,
+<a href='../S/53.html#L321'>acseg_rbtree_node_t</a>  321 acseg_rbtree.c     acseg_rbtree_node_t *node)
+<a href='../S/53.html#L323'>acseg_rbtree_node_t</a>  323 acseg_rbtree.c     acseg_rbtree_node_t  *temp;
+<a href='../S/53.html#L348'>acseg_rbtree_node_t</a>  348 acseg_rbtree.c acseg_rbtree_node_t *
+<a href='../S/53.html#L353'>acseg_rbtree_node_t</a>  353 acseg_rbtree.c 	acseg_rbtree_node_t *sentinel, *tmp_node;
+<a href='../S/47.html#L20'>acseg_rbtree_node_t</a>   20 acseg_rbtree.h     acseg_rbtree_node_t     *left;
+<a href='../S/47.html#L21'>acseg_rbtree_node_t</a>   21 acseg_rbtree.h     acseg_rbtree_node_t     *right;
+<a href='../S/47.html#L22'>acseg_rbtree_node_t</a>   22 acseg_rbtree.h     acseg_rbtree_node_t     *parent;
+<a href='../S/47.html#L29'>acseg_rbtree_node_t</a>   29 acseg_rbtree.h typedef acseg_rbtree_node_t * (*acseg_rbtree_insert_pt) (acseg_rbtree_node_t*root, 
+<a href='../S/47.html#L33'>acseg_rbtree_node_t</a>   33 acseg_rbtree.h     acseg_rbtree_node_t     *root;
+<a href='../S/47.html#L34'>acseg_rbtree_node_t</a>   34 acseg_rbtree.h     acseg_rbtree_node_t     *sentinel;
+<a href='../S/47.html#L44'>acseg_rbtree_node_t</a>   44 acseg_rbtree.h void acseg_rbtree_insert(acseg_rbtree_t *tree, acseg_rbtree_node_t *node);
+<a href='../S/47.html#L46'>acseg_rbtree_node_t</a>   46 acseg_rbtree.h void acseg_rbtree_delete(acseg_rbtree_t *tree, acseg_rbtree_node_t *node);
+<a href='../S/47.html#L48'>acseg_rbtree_node_t</a>   48 acseg_rbtree.h acseg_rbtree_node_t * acseg_rbtree_search(acseg_rbtree_t *tree, 
+<a href='../S/47.html#L61'>acseg_rbtree_node_t</a>   61 acseg_rbtree.h acseg_rbtree_node_t * acseg_rbtree_insert_value(
+<a href='../S/47.html#L62'>acseg_rbtree_node_t</a>   62 acseg_rbtree.h 		acseg_rbtree_node_t *temp, acseg_rbtree_node_t *node, acseg_rbtree_node_t *sentinel);
+<a href='../S/47.html#L64'>acseg_rbtree_node_t</a>   64 acseg_rbtree.h static inline acseg_rbtree_node_t *
+<a href='../S/47.html#L65'>acseg_rbtree_node_t</a>   65 acseg_rbtree.h acseg_rbtree_min(acseg_rbtree_node_t *node, acseg_rbtree_node_t *sentinel)
+<a href='../S/21.html#L14'>acseg_rbtree_node_t</a>   14 acseg_tree.c   create_index_item(acseg_str_t *atom, acseg_rbtree_node_t 
+<a href='../S/21.html#L42'>acseg_rbtree_node_t</a>   42 acseg_tree.c   	acseg_rbtree_node_t * rbtree_sentinel;
+<a href='../S/21.html#L53'>acseg_rbtree_node_t</a>   53 acseg_tree.c   	rbtree_sentinel = (acseg_rbtree_node_t *) mc_calloc(&amp;mc, sizeof(acseg_rbtree_node_t));
+<a href='../S/21.html#L64'>acseg_rbtree_node_t</a>   64 acseg_tree.c   static acseg_rbtree_node_t *
+<a href='../S/21.html#L67'>acseg_rbtree_node_t</a>   67 acseg_tree.c   	acseg_rbtree_node_t * node;	
+<a href='../S/21.html#L69'>acseg_rbtree_node_t</a>   69 acseg_tree.c   	node = (acseg_rbtree_node_t *) mc_calloc(mc, sizeof(acseg_rbtree_node_t));
+<a href='../S/21.html#L98'>acseg_rbtree_node_t</a>   98 acseg_tree.c   	acseg_rbtree_node_t * rbtree_sentinel, *s_node, *insert_node;
+<a href='../S/21.html#L191'>acseg_rbtree_node_t</a>  191 acseg_tree.c   add_all_item_to_queue(acseg_rbtree_node_t *node, 
+<a href='../S/21.html#L192'>acseg_rbtree_node_t</a>  192 acseg_tree.c   		acseg_rbtree_node_t *sentinel, acseg_list_t *queue, mc_collector_t **mc)
+<a href='../S/21.html#L214'>acseg_rbtree_node_t</a>  214 acseg_tree.c   	acseg_rbtree_node_t *node;
+</pre>
+</body>
+</html>

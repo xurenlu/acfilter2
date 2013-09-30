@@ -1,0 +1,188 @@
+<html>
+<head>
+<title>acseg_util.c</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/acseg_util.c</h2>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L31'>[^]</a><a href='#L139'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<h2>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L31' title='Defined at 31.'>get_word_size</a>
+<li><a href='#L45' title='Defined at 45.'>get_mblen</a>
+<li><a href='#L51' title='Defined at 51.'>ord_utf8_wch</a>
+<li><a href='#L68' title='Defined at 68.'>acseg_copy_str_t</a>
+<li><a href='#L86' title='Defined at 86.'>acseg_list_init</a>
+<li><a href='#L99' title='Defined at 99.'>acseg_list_add</a>
+<li><a href='#L120' title='Defined at 120.'>acseg_list_extend</a>
+<li><a href='#L133' title='Defined at 133.'>acseg_queue_push</a>
+<li><a href='#L139' title='Defined at 139.'>acseg_queue_pop</a>
+</ol>
+<hr>
+<pre>
+<a name='L1'><i><font color='green'>/**</font></i>
+<a name='L2'><i><font color='green'> *</font></i>
+<a name='L3'><i><font color='green'> */</font></i>
+<a name='L4'><font color='darkred'>#include</font> &lt;stdio.h&gt;
+<a name='L5'><font color='darkred'>#include</font> &lt;stdlib.h&gt;
+<a name='L6'>
+<a name='L7'><font color='darkred'>#include</font> "<a href='6.html'>acseg_util.h</a>"
+<a name='L8'><font color='darkred'>#include</font> "<a href='4.html'>mem_collector.h</a>"
+<a name='L9'>
+<a name='L10'><b>static</b> <b>unsigned</b> <b>char</b> mblen_table_utf8[] = 
+<a name='L11'><font color='red'>{</font>
+<a name='L12'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L13'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L14'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L15'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L16'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L17'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L18'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L19'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L20'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L21'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L22'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L23'>        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+<a name='L24'>        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+<a name='L25'>        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+<a name='L26'>        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+<a name='L27'>        4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
+<a name='L28'><font color='red'>}</font>;
+<a name='L29'>
+<a name='L30'><b>unsigned</b> <b>int</b> 
+<a name='L31'><a href='../S/6.html#L26' title='Refered from 26 in acseg_util.h.'>get_word_size</a>(<b>const</b> <b>char</b> *word, <b>unsigned</b> <b>int</b> word_len)
+<a name='L32'><font color='red'>{</font>
+<a name='L33'>        <b>unsigned</b> <b>int</b> i    = 0;
+<a name='L34'>        <b>unsigned</b> <b>int</b> size = 0;
+<a name='L35'>
+<a name='L36'>        <b>while</b> (i &lt; word_len)<font color='red'>{</font>
+<a name='L37'>                i = i + mblen_table_utf8[ (u_char)word[i] ];
+<a name='L38'>                size = size + 1;
+<a name='L39'>        <font color='red'>}</font>
+<a name='L40'>
+<a name='L41'>        <b>return</b> size;
+<a name='L42'><font color='red'>}</font>
+<a name='L43'>
+<a name='L44'><b>inline</b> <b>unsigned</b> <b>int</b> 
+<a name='L45'><a href='../R/80.html' title='Multiple refered from 5 places.'>get_mblen</a>(u_char ch)
+<a name='L46'><font color='red'>{</font>
+<a name='L47'>        <b>return</b> mblen_table_utf8[ch];
+<a name='L48'><font color='red'>}</font>
+<a name='L49'>
+<a name='L50'>uint64_t 
+<a name='L51'><a href='../R/91.html' title='Multiple refered from 4 places.'>ord_utf8_wch</a>(<b>const</b> <b>char</b> *wch_str)
+<a name='L52'><font color='red'>{</font>
+<a name='L53'>        <b>int</b> i, mblen;
+<a name='L54'>        uint64_t code_value;
+<a name='L55'>
+<a name='L56'>        i = 0;
+<a name='L57'>        code_value = 0;
+<a name='L58'>
+<a name='L59'>        mblen = <a href='../S/14.html#L45' title='Defined at 45 in acseg_util.c.'>get_mblen</a>((u_char)wch_str[0]);
+<a name='L60'>        <b>while</b> (i &lt; mblen) <font color='red'>{</font>
+<a name='L61'>                code_value = (code_value &lt;&lt; 8) | ((u_char) wch_str[i]);
+<a name='L62'>                i = i + 1;
+<a name='L63'>        <font color='red'>}</font>
+<a name='L64'>        <b>return</b> code_value;
+<a name='L65'><font color='red'>}</font>
+<a name='L66'>
+<a name='L67'><b>void</b>
+<a name='L68'><a href='../R/23.html' title='Multiple refered from 3 places.'>acseg_copy_str_t</a>(<a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *dest, <a href='../S/6.html#L17' title='Defined at 17 in acseg_util.h.'>acseg_str_t</a> *src, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc)
+<a name='L69'><font color='red'>{</font>
+<a name='L70'>
+<a name='L71'>        <b>if</b> (src-&gt;data == NULL)<font color='red'>{</font>
+<a name='L72'>                dest-&gt;data = NULL;      
+<a name='L73'>                dest-&gt;len = 0;
+<a name='L74'>        <font color='red'>}</font> <b>else</b> <font color='red'>{</font>
+<a name='L75'>                dest-&gt;data = (u_char *) <a href='../S/18.html#L36' title='Defined at 36 in mem_collector.c.'>mc_calloc</a>(mc, src-&gt;len);
+<a name='L76'>                memcpy(dest-&gt;data, src-&gt;data, src-&gt;len);
+<a name='L77'>                dest-&gt;len = src-&gt;len;
+<a name='L78'>        <font color='red'>}</font>
+<a name='L79'><font color='red'>}</font>
+<a name='L80'>
+<a name='L81'><i><font color='green'>/* </font></i>
+<a name='L82'><i><font color='green'> * ac list</font></i>
+<a name='L83'><i><font color='green'> */</font></i>
+<a name='L84'>
+<a name='L85'><a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> * 
+<a name='L86'><a href='../R/38.html' title='Multiple refered from 6 places.'>acseg_list_init</a>(<a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc)
+<a name='L87'><font color='red'>{</font>
+<a name='L88'>        <a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list;
+<a name='L89'>
+<a name='L90'>        list = (<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *) <a href='../S/18.html#L36' title='Defined at 36 in mem_collector.c.'>mc_calloc</a>(mc, <b>sizeof</b>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a>));
+<a name='L91'>
+<a name='L92'>        list-&gt;first = NULL;
+<a name='L93'>        list-&gt;last = NULL;
+<a name='L94'>
+<a name='L95'>        <b>return</b> list;
+<a name='L96'><font color='red'>}</font>
+<a name='L97'>
+<a name='L98'><b>void</b>
+<a name='L99'><a href='../R/36.html' title='Multiple refered from 5 places.'>acseg_list_add</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list, <b>void</b> *data, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc)
+<a name='L100'><font color='red'>{</font>
+<a name='L101'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *list_item;
+<a name='L102'>
+<a name='L103'>        list_item = (<a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *) <a href='../S/18.html#L36' title='Defined at 36 in mem_collector.c.'>mc_calloc</a>(mc, <b>sizeof</b>(<a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a>));
+<a name='L104'>
+<a name='L105'>        list_item-&gt;next = NULL;
+<a name='L106'>        list_item-&gt;data = data;
+<a name='L107'>
+<a name='L108'>        <b>if</b> (list-&gt;first == NULL) <font color='red'>{</font>
+<a name='L109'>                list-&gt;first = list_item;
+<a name='L110'>        <font color='red'>}</font>
+<a name='L111'>
+<a name='L112'>        <b>if</b> (list-&gt;last) <font color='red'>{</font>
+<a name='L113'>                list-&gt;last-&gt;next = list_item;
+<a name='L114'>        <font color='red'>}</font>
+<a name='L115'>
+<a name='L116'>        list-&gt;last = list_item;
+<a name='L117'><font color='red'>}</font>
+<a name='L118'>
+<a name='L119'><b>void</b> 
+<a name='L120'><a href='../R/37.html' title='Multiple refered from 3 places.'>acseg_list_extend</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list, <a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *addon, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc)
+<a name='L121'><font color='red'>{</font>
+<a name='L122'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *tmp;
+<a name='L123'>
+<a name='L124'>        tmp = addon-&gt;first;
+<a name='L125'>        <b>while</b> (tmp)<font color='red'>{</font>
+<a name='L126'>                <i><font color='green'>//printf("add: \n");</font></i>
+<a name='L127'>                <a href='../S/14.html#L99' title='Defined at 99 in acseg_util.c.'>acseg_list_add</a>(list, tmp-&gt;data, mc);
+<a name='L128'>                tmp = tmp-&gt;next;
+<a name='L129'>        <font color='red'>}</font>
+<a name='L130'><font color='red'>}</font>
+<a name='L131'>
+<a name='L132'><b>void</b> 
+<a name='L133'><a href='../R/43.html' title='Multiple refered from 3 places.'>acseg_queue_push</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list, <b>void</b> *data, <a href='../S/4.html#L10' title='Defined at 10 in mem_collector.h.'>mc_collector_t</a> **mc)
+<a name='L134'><font color='red'>{</font>
+<a name='L135'>        <a href='../S/14.html#L99' title='Defined at 99 in acseg_util.c.'>acseg_list_add</a>(list, data, mc);
+<a name='L136'><font color='red'>}</font>
+<a name='L137'>
+<a name='L138'><b>void</b> *
+<a name='L139'><a href='../R/42.html' title='Multiple refered from 4 places.'>acseg_queue_pop</a>(<a href='../S/6.html#L45' title='Defined at 45 in acseg_util.h.'>acseg_list_t</a> *list)
+<a name='L140'><font color='red'>{</font>
+<a name='L141'>        <b>void</b> * result;
+<a name='L142'>        <a href='../S/6.html#L35' title='Defined at 35 in acseg_util.h.'>acseg_list_item_t</a> *next;
+<a name='L143'>
+<a name='L144'>        result = NULL;
+<a name='L145'>        <b>if</b> (list-&gt;first)<font color='red'>{</font>
+<a name='L146'>                result = list-&gt;first-&gt;data;
+<a name='L147'>                next = list-&gt;first-&gt;next;
+<a name='L148'>                <a href='../S/18.html#L49' title='Defined at 49 in mem_collector.c.'>mc_free</a>(list-&gt;first);
+<a name='L149'>                list-&gt;first = next;
+<a name='L150'>        <font color='red'>}</font>
+<a name='L151'>
+<a name='L152'>        <b>if</b> (list-&gt;first == NULL)<font color='red'>{</font>
+<a name='L153'>                list-&gt;last = NULL;
+<a name='L154'>        <font color='red'>}</font>
+<a name='L155'>
+<a name='L156'>        <b>return</b> result;
+<a name='L157'><font color='red'>}</font>
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;]<a href='#L31'>[^]</a><a href='#L139'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>

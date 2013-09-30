@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>acfilter.php</title>
+<meta name='robots' content='noindex,nofollow'>
+<meta name='generator' content='GLOBAL-5.7.1'>
+</head>
+<body text='#191970' bgcolor='#f5f5dc' vlink='gray'>
+<a name='TOP'><h2><a href='../mains.html'>root</a>/acfilter.php</h2>
+<i><font color='green'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+<hr>
+<pre>
+<a name='L1'>&lt;?php
+<a name='L2'>$br = (php_sapi_name() == "cli")? "":"&lt;br&gt;";
+<a name='L3'>
+<a name='L4'><b>echo</b> "方法一:\n";<i><font color='green'>//挨个加入禁词;</font></i>
+<a name='L5'>$ac=acfilter_new();
+<a name='L6'>var_dump($ac);
+<a name='L7'>acfilter_add_word($ac,"河边");
+<a name='L8'>acfilter_add_word($ac,"狗屎");
+<a name='L9'>acfilter_add_word($ac,",");
+<a name='L10'>acfilter_add_word($ac,"工信部");
+<a name='L11'>acfilter_prepare($ac);
+<a name='L12'>print_r(acfilter_check_text($ac,"曾经有一个很狗屎的部门,叫工信部,到河边自杀了"));
+<a name='L13'>acfilter_close($ac);
+<a name='L14'>
+<a name='L15'><i><font color='green'>//方法二:加载词库;</font></i>
+<a name='L16'><b>echo</b> "\n\n方法二:\n";
+<a name='L17'>$ac=acfilter_new();
+<a name='L18'>acfilter_load_dict($ac,"./dict.txt");
+<a name='L19'>acfilter_prepare($ac);
+<a name='L20'>print_r(acfilter_check_text($ac,"曾经有一个很狗屎的部门,叫工信部,到河边自杀了"));
+<a name='L21'>acfilter_close($ac);
+<a name='L22'>
+<a name='L23'>?&gt;
+</pre>
+<hr>
+<a name='BOTTOM'>
+<i><font color='green'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</font></i>
+</body>
+</html>
